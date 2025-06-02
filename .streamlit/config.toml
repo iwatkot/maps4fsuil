@@ -1,0 +1,11 @@
+# .streamlit/config.toml
+
+[server]
+maxUploadSize = 1000
+enableCORS = "false"
+enableXsrfProtection = "false"
+disconnectedSessionTTL = 600
+
+[client]
+toolbarMode = "viewer"
+showErrorDetails = "none"
