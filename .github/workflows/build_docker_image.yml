@@ -12,13 +12,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    # - name: Wait until PyPI release is available
-    #   uses: actions/github-script@v3
-    #   with:
-    #     script: |
-    #       const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-    #       await wait(300000); // Wait for 5 minutes
-
     - name: Login to DockerHub
       uses: docker/login-action@v2 
       with:
@@ -44,12 +37,12 @@ jobs:
     needs: build
 
     steps:
-      # - name: Wait until Docker image is available
-      #   uses: actions/github-script@v3
-      #   with:
-      #     script: |
-      #       const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-      #       await wait(180000); // Wait for 3 minutes
+      - name: Wait until Docker image is available
+        uses: actions/github-script@v3
+        with:
+          script: |
+            const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+            await wait(180000); // Wait for 3 minutes
 
       - name: Make POST request to redeploy
         run: |
