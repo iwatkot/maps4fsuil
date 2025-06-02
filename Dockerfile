@@ -56,7 +56,9 @@ RUN apt-get update && apt-get install -y \
     libspnav0 \
     libtinyxml2.6.2v5 \
     libjemalloc2 \
-    libjemalloc-dev
+    libjemalloc-dev \
+    git \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install blender 4.3.0.
 RUN wget https://download.blender.org/release/Blender4.3/blender-4.3.0-linux-x64.tar.xz && \
@@ -67,9 +69,13 @@ RUN wget https://download.blender.org/release/Blender4.3/blender-4.3.0-linux-x64
 
 WORKDIR /usr/src/app
 
+# Clone external repo and copy data/docs
+RUN git clone --depth 1 https://github.com/iwatkot/maps4fs.git /tmp/maps4fs \
+    && cp -r /tmp/maps4fs/data /usr/src/app/data \
+    && cp -r /tmp/maps4fs/docs /usr/src/app/docs \
+    && rm -rf /tmp/maps4fs
+
 COPY .streamlit /usr/src/app/.streamlit
-COPY data /usr/src/app/data
-COPY docs /usr/src/app/docs
 COPY maps4fsui /usr/src/app/maps4fsui
 COPY requirements.txt /usr/src/app/requirements.txt
 
