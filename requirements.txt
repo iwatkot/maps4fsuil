@@ -19,3 +19,4 @@ streamlit-folium
 schedule
 python-dotenv
 requests-cache
+git+https://github.com/iwatkot/maps4fsapi.git

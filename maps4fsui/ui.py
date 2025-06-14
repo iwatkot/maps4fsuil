@@ -1,11 +1,15 @@
 import os
+import socket
+import threading
 from datetime import datetime
 
 import requests
 import requests_cache
 import streamlit as st
-from config import DOCS_DIRECTORY, FAQ_MD, get_mds
+import uvicorn
+from config import DOCS_DIRECTORY, FAQ_MD, FASTAPI_PORT, get_mds
 from generator.generator import GeneratorUI
+from maps4fsapi.main import app
 from templates import Messages, video_tutorials
 from toolbox import ToolboxUI
 
@@ -104,6 +108,32 @@ class WebUI:
                 )
             except Exception as e:
                 st.error(f"An error occurred while fetching the changelog: {e}")
+
+
+# Launch maps4fsapi in a separate thread.
+
+
+def run_maps4fsapi() -> None:
+    """Run the FastAPI application in a separate thread."""
+    uvicorn.run(app, host="0.0.0.0", port=FASTAPI_PORT)
+
+
+def is_port_in_use(port: int) -> bool:
+    """Check if a port is in use.
+
+    Arguments:
+        port (int): The port number to check.
+
+    Returns:
+        bool: True if the port is in use, False otherwise.
+    """
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        return s.connect_ex(("localhost", port)) == 0
+
+
+if not is_port_in_use(FASTAPI_PORT):
+    api_thread = threading.Thread(target=run_maps4fsapi, daemon=True)
+    api_thread.start()
 
 
 WebUI()

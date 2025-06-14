@@ -1,7 +1,7 @@
 import json
 import os
-import platform
 import shutil
+import subprocess
 import threading
 from time import sleep
 from typing import Any, Literal
@@ -9,6 +9,7 @@ from typing import Any, Literal
 import requests
 import schedule
 
+FASTAPI_PORT = 8000
 WORKING_DIRECTORY = os.getcwd()
 ARCHIVES_DIRECTORY = os.path.join(WORKING_DIRECTORY, "archives")
 DATA_DIRECTORY = os.path.join(WORKING_DIRECTORY, "data")
@@ -142,19 +143,21 @@ def get_versions() -> tuple[str, str] | None:
 
 
 def get_package_version(package_name: str) -> str:
-    """Get the package version.
-
-    Returns:
-        str: The package version.
-    """
-    current_os = platform.system().lower()
-    if current_os == "windows":
-        command = f"pip list 2>NUL | findstr {package_name}"
-    else:
-        command = f"pip list 2>/dev/null | grep {package_name}"
-
-    response = os.popen(command).read()
-    return response.replace(package_name, "").strip()
+    """Get the package version."""
+    try:
+        result = subprocess.run(
+            [os.sys.executable, "-m", "pip", "show", package_name],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=True,
+        )
+        for line in result.stdout.splitlines():
+            if line.startswith("Version:"):
+                return line.split(":", 1)[1].strip()
+        return ""
+    except Exception:
+        return ""
 
 
 def get_directory_size(directory: str) -> int:
