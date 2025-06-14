@@ -24,8 +24,8 @@ jobs:
         context: .
         push: true
         tags: |
-          iwatkot/maps4fstest:latest
-          iwatkot/maps4fstest:${{ github.ref_name }}
+          iwatkot/maps4fs:latest
+          iwatkot/maps4fs:${{ github.ref_name }}
         file: ./Dockerfile
         build-args: |
           API_TOKEN=${{ secrets.API_TOKEN }}
