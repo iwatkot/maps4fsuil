@@ -5,10 +5,9 @@ from time import sleep, time
 from typing import Generator
 
 from config import QUEUE_FILE, QUEUE_INTERVAL, QUEUE_TIMEOUT
-
 from maps4fs import Logger
 
-logger = Logger(level="INFO", to_file=False)
+logger = Logger(level="INFO")
 
 
 def get_queue(force: bool = False) -> dict[int, str]:

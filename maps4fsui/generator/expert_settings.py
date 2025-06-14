@@ -3,11 +3,10 @@ import os
 from datetime import datetime
 
 import config
+import maps4fs as mfs
 import streamlit as st
 from generator.base_component import BaseComponent
 from templates import Messages
-
-import maps4fs as mfs
 
 
 class ExpertSettings(BaseComponent):
@@ -15,7 +14,7 @@ class ExpertSettings(BaseComponent):
         super().__init__(public, **kwargs)
         self.game_code = kwargs["game_code"]
         self.settings = kwargs["settings"]
-        self.logger = mfs.Logger(level="INFO", to_file=False)
+        self.logger = mfs.Logger(level="INFO")
 
         self.custom_background_path = None
         self.expert_mode = False
@@ -31,9 +30,9 @@ class ExpertSettings(BaseComponent):
             if not self.public:
                 enable_debug = st.checkbox("Enable debug logs", key="debug_logs")
                 if enable_debug:
-                    self.logger = mfs.Logger(level="DEBUG", to_file=False)
+                    self.logger = mfs.Logger(level="DEBUG")
                 else:
-                    self.logger = mfs.Logger(level="INFO", to_file=False)
+                    self.logger = mfs.Logger(level="INFO")
 
             self.custom_osm_enabled = st.checkbox(
                 "Upload custom OSM file",
