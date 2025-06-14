@@ -24,7 +24,7 @@ class Messages:
         "You can also run the app locally, it will work faster, has no limitations, and "
         "have some additional features.  \n"
         "If you have Docker installed it's just one command:  \n"
-        "```bash  \ndocker run -p 8501:8501 iwatkot/maps4fs  \n```  \n"
+        "```bash  \ndocker run -p 8501:8501 -p 8000:8000 iwatkot/maps4fs  \n```  \n"
         "Detailed instuctions are available in the [README](https://github.com/iwatkot/maps4fs"
         "?tab=readme-ov-file#option-2-docker-version)."
     )

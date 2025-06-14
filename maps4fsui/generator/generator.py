@@ -4,6 +4,7 @@ from datetime import datetime
 from time import perf_counter
 
 import config
+import maps4fs as mfs
 import streamlit as st
 from generator.advanced_settings import AdvancedSettings
 from generator.expert_settings import ExpertSettings
@@ -12,8 +13,6 @@ from PIL import Image
 from queuing import add_to_queue, get_queue_length, remove_from_queue, wait_in_queue
 from streamlit_stl import stl_from_file
 from templates import Messages
-
-import maps4fs as mfs
 
 Image.MAX_IMAGE_PIXELS = None
 
@@ -86,7 +85,7 @@ class GeneratorUI:
                         "```bash   \n"
                         "docker stop maps4fs   \n"
                         "docker rm maps4fs   \n"
-                        "docker run -d -p 8501:8501 --name maps4fs "
+                        "docker run -d -p 8501:8501 -p 8000:8000 --name maps4fs "
                         f"iwatkot/maps4fs:{latest_version}   \n"
                         "```"
                     )
