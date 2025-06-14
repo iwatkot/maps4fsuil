@@ -87,6 +87,7 @@ RUN sed -i 's|<noscript>.*</noscript>|<noscript>Generate map templates for Farmi
 RUN sed -i 's|<title>.*</title>|<title>maps4FS</title>|' /usr/local/lib/python3.11/site-packages/streamlit/static/index.html
 
 EXPOSE 8501
+EXPOSE 8000
 
 ENV PYTHONPATH .:${PYTHONPATH}
 CMD ["streamlit", "run", "./maps4fsui/ui.py"]
