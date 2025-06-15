@@ -14,6 +14,12 @@
     <a href="#maps4fs">Maps4FS</a> •
     <a href="#overview">Overview</a>
 </p>
+
+[![Join Discord](https://img.shields.io/badge/join-discord-blue)](https://discord.gg/Sj5QKKyE42)
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/iwatkot/maps4fsui)](https://github.com/iwatkot/maps4fsui/releases)
+[![GitHub issues](https://img.shields.io/github/issues/iwatkot/maps4fsui)](https://github.com/iwatkot/maps4fsui/issues)
+[![GitHub Repo stars](https://img.shields.io/github/stars/iwatkot/maps4fsui)](https://github.com/iwatkot/maps4fsui/stargazers)
+
 </div>
 
 # Maps4FS
