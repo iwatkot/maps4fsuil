@@ -78,6 +78,8 @@ RUN git clone --depth 1 https://github.com/iwatkot/maps4fs.git /tmp/maps4fs \
 COPY .streamlit /usr/src/app/.streamlit
 COPY maps4fsui /usr/src/app/maps4fsui
 COPY requirements.txt /usr/src/app/requirements.txt
+COPY entrypoint.sh /usr/src/app/entrypoint.sh
+RUN chmod +x /usr/src/app/entrypoint.sh
 
 RUN pip install -r requirements.txt
 
@@ -90,4 +92,5 @@ EXPOSE 8501
 EXPOSE 8000
 
 ENV PYTHONPATH .:${PYTHONPATH}
-CMD ["streamlit", "run", "./maps4fsui/ui.py"]
+# CMD ["streamlit", "run", "./maps4fsui/ui.py"]
+CMD ["/usr/src/app/entrypoint.sh"]

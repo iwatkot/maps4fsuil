@@ -9,7 +9,6 @@ from typing import Any, Literal
 import requests
 import schedule
 
-FASTAPI_PORT = 8000
 WORKING_DIRECTORY = os.getcwd()
 ARCHIVES_DIRECTORY = os.path.join(WORKING_DIRECTORY, "archives")
 DATA_DIRECTORY = os.path.join(WORKING_DIRECTORY, "data")
