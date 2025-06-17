@@ -7,7 +7,7 @@ import streamlit as st
 from config import DOCS_DIRECTORY, FAQ_MD, get_mds
 from generator.generator import GeneratorUI
 from templates import Messages, video_tutorials
-from toolbox import ToolboxUI
+from tools.section import Schemas
 
 requests_cache.install_cache("github_cache", expire_after=1800)
 
@@ -19,7 +19,7 @@ class WebUI:
             generator_tab,
             step_by_step_tab,
             video_tutorials_tab,
-            toolbox_tab,  # TODO: Replace with schema_editor_tab
+            schema_editor_tab,
             knowledge_tab,
             faq_tab,
             changelog_tab,
@@ -28,7 +28,7 @@ class WebUI:
                 "🗺️ Map Generator",
                 "🔢 Step by step",
                 "📹 Video Tutorials",
-                "🧰 Modder Toolbox",  # TODO: Replace with "📑 Schema Editor"
+                "📑 Schema Editor",
                 "📖 Knowledge base",
                 "📝 FAQ",
                 "📄 Changelog",
@@ -54,8 +54,9 @@ class WebUI:
                             f"*{video_tutorial.description}*"
                         )
 
-        with toolbox_tab:
-            self.toolbox = ToolboxUI()
+        with schema_editor_tab:
+            self.schema_editor = Schemas()
+            self.schema_editor.add()
 
         with knowledge_tab:
             st.title("Knowledge base")

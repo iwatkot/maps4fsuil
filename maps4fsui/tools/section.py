@@ -1,8 +1,5 @@
 from typing import Type
 
-from tools.background import ConvertImageToObj
-from tools.custom_osm import FixCustomOsmFile
-from tools.dem import GeoTIFFWindowingTool
 from tools.textures import TextureSchemaEditorTool
 from tools.tool import Tool
 from tools.trees import TreeSchemaEditorTool
@@ -23,19 +20,7 @@ class Section:
             tool()
 
 
-class Shemas(Section):
+class Schemas(Section):
     title = "📄 Schemas"
     description = "Tools to work with different schemas."
     tools = [TreeSchemaEditorTool, TextureSchemaEditorTool]
-
-
-class TexturesAndDEM(Section):
-    title = "🖼️ Textures and DEM"
-    description = "Tools to work with textures and digital elevation models."
-    tools = [FixCustomOsmFile, GeoTIFFWindowingTool]
-
-
-class Background(Section):
-    title = "🏔️ Background"
-    description = "Tools to work with background terrain."
-    tools = [ConvertImageToObj]
