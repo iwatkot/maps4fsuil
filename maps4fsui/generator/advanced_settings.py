@@ -1,8 +1,7 @@
+import maps4fs as mfs
 import streamlit as st
 from generator.base_component import BaseComponent
 from templates import Settings
-
-import maps4fs as mfs
 
 
 class AdvancedSettings(BaseComponent):

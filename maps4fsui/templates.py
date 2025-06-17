@@ -455,6 +455,10 @@ class Settings:
         "If add reversed splines is enabled, the splines will be generated in both directions. "
         "Otherwise, only one direction will be generated (as in the OSM data)."
     )
+    FIELD_SPLINES = (
+        "If field splines is enabled, the additional splines will be generated "
+        "around the fields. It may not work for the fields partially available on the map."
+    )
 
     # Satellite Settings
 
