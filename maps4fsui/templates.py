@@ -116,10 +116,6 @@ class Messages:
         "https://github.com/iwatkot/maps4fs?tab=readme-ov-file#option-2-docker-version)  of the tool."
     )
 
-    COMMUNITY_PROVIDER = (
-        "This DTM provider was developed by the community, if you have any issues with it "
-        "please contact the author."
-    )
     CUSTOM_TEMPLATE_INFO = (
         "This option allows you to upload your own map template.  \n"
         "The template should match the structure of the default template, otherwise it will "

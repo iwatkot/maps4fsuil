@@ -1,13 +1,12 @@
 from time import sleep
 
 import config
+import maps4fs as mfs
 import osmp
 import streamlit as st
 from generator.base_component import BaseComponent
 from streamlit_folium import folium_static
 from templates import Messages
-
-import maps4fs as mfs
 
 
 class MainSettings(BaseComponent):
@@ -149,15 +148,6 @@ class MainSettings(BaseComponent):
 
         with self.provider_info_container:
             with st.container():
-                if provider.is_community():
-                    st.warning(Messages.COMMUNITY_PROVIDER, icon="💡")
-                    st.write(f"Author: {provider.author()}")
-                    if provider.contributors() is not None:
-                        st.write(f"Contributors: {provider.contributors()}")
-
-                if provider.base_instructions() is not None:
-                    st.write(provider.base_instructions())
-
                 if provider.instructions() is not None:
                     st.write(provider.instructions())
 
