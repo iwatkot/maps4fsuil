@@ -7,8 +7,10 @@ from templates import Settings
 class AdvancedSettings(BaseComponent):
     def __init__(self, public: bool, **kwargs):
         super().__init__(public, **kwargs)
-        dtm_provider = mfs.DTMProvider.get_provider_by_code(kwargs.get("dtm_provider_code"))
-        self.provider_default_settings = dtm_provider.default_settings() if dtm_provider else {}
+        dtm_provider_code = kwargs.get("dtm_provider_code", "srtm30")
+        self.provider_default_settings = {}
+        if dtm_provider_code == "srtm30":
+            self.provider_default_settings = {"DEMSettings": {"blur_radius": 35}}
         self.get_settings()
 
     def get_settings(self):
