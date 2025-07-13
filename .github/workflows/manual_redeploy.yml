@@ -1,0 +1,16 @@
+name: Manual Redeploy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  redeploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Make POST request to redeploy
+        run: |
+          curl -X POST "${{ secrets.REDEPLOY_ENDPOINT }}" \
+            -H "Authorization: Bearer ${{ secrets.PRIVATE_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"container_key": "generator"}'
