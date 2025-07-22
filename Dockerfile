@@ -1,4 +1,4 @@
-FROM python:3.11-slim-buster
+FROM python:3.11-slim-bullseye
 
 ARG API_TOKEN
 ENV API_TOKEN=${API_TOKEN}
