@@ -1,4 +1,4 @@
-FROM python:3.11-slim-buster
+FROM python:3.11-slim-bullseye
 
 ARG API_TOKEN
 ENV API_TOKEN=${API_TOKEN}
@@ -45,7 +45,7 @@ RUN apt-get update && apt-get install -y \
     libavfilter7 \
     libglew2.1 \
     libopencolorio1v5 \
-    libraw19 \
+    libraw20 \
     libtiff5 \
     libjpeg62-turbo \
     libpng16-16 \
