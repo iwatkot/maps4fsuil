@@ -33,5 +33,12 @@
     "description": "How to add a background terrain with satellite image.",
     "link": "https://www.youtube.com/watch?v=j0_tmJgfdpw",
     "image": "https://github.com/user-attachments/assets/09a69ec0-db66-4911-9e8e-00b5d117f022"
+  },
+  {
+    "episode": 5,
+    "title": "How to create water planes?",
+    "description": "How to add water to your map.",
+    "link": "https://www.youtube.com/watch?v=lZeEZ-ce3cI",
+    "image": "https://github.com/iwatkot/maps4fs/releases/download/2.0.2/ep06.png"
   }
 ]
