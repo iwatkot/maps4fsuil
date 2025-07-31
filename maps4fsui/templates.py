@@ -372,6 +372,20 @@ class Settings:
         "performance issues.  \n"
         "ℹ️ **Units:** meters between trees."
     )
+    TREE_LIMIT = (
+        "Tree limit value This value will be used to adjust the forest density value. "
+        "For example, if it's possible to place 100000 trees from OSM data, and the forest "
+        "density is set to 10, the expected number of trees on the map will be 10000. "
+        "At the same time, if you set the tree limit to 5000, the forest density will be "
+        "adjusted to 20, which means that the distance between the trees will be doubled. "
+        "This value is useful to prevent the Giants Editor from crashing due to too many "
+        "trees on the map. By default, it's set to 0, which means that it's disabled and will "
+        "use the forest density value as is.  Note, that it will not lead to the exact number "
+        "of trees, but will adjust the forest density value to fit the tree limit so the "
+        "resulting number of trees will be more or less equal to the tree limit value.  \n"
+        "ℹ️ **Units:** integer value, 0 means no limit."
+    )
+
     FOREST_DENSITY_EXAMPLE = (
         "![](https://github.com/user-attachments/assets/bf353ed6-f25c-4226-b0d6-105ada0f097b)"
     )
