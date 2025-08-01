@@ -213,6 +213,17 @@ class Settings:
     ADD_FOUNDATIONS_EXAMPLE = (
         "![](https://github.com/user-attachments/assets/51cd6005-6971-49e5-a649-4ea31abac95d)"
     )
+    FLATTEN_ROADS = (
+        "If flatten roads is enabled, the terrain under the roads will be flattened. "
+        "Do not use this option with high quality DTM Providers, that should already "
+        "have flattened roads. Otherwise, it may lead to the worse result."
+    )
+    FLATTEN_ROADS_EXAMPLE = (
+        "![](https://github.com/iwatkot/maps4fsui/releases/download/2.1.2/flatten_roads.png)  \n"
+        "⚠️ **Note:** This image represents the difference when using low quality DEM data "
+        "with resolution of 30 meters per pixel. If you're using high quality DEM data, "
+        "do not use this feature, because it may lead to unexpected results."
+    )
 
     # Background Settings
 
