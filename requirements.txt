@@ -19,4 +19,6 @@ streamlit-folium
 schedule
 python-dotenv
 requests-cache
+mapbox-earcut
+manifold3d
 git+https://github.com/iwatkot/maps4fsapi.git
