@@ -224,6 +224,13 @@ class Settings:
         "with resolution of 30 meters per pixel. If you're using high quality DEM data, "
         "do not use this feature, because it may lead to unexpected results."
     )
+    FLATTEN_WATER = (
+        "If flatten water is enabled, the bottom of the water resources will be set to the average "
+        "height of the water resources for the whole map. This option is suitable for the maps "
+        "with the water resources that are not differ too much in height. "
+        "Do not use this option if the terrain of your map contains big hills or mountains, "
+        "because it may lead to the worse result."
+    )
 
     # Background Settings
 
