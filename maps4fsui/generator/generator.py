@@ -1,10 +1,10 @@
 import json
 import os
-from datetime import datetime
 from time import perf_counter
 
 import config
 import maps4fs as mfs
+import maps4fs.generator.config as mfscfg
 import streamlit as st
 from generator.advanced_settings import AdvancedSettings
 from generator.expert_settings import ExpertSettings
@@ -52,9 +52,6 @@ class GeneratorUI:
             self.add_right_widgets()
 
         with self.left_column:
-            if config.is_on_community_server():
-                st.error(Messages.MOVED, icon="🚜")
-
             self.add_left_widgets()
 
         self.main_settings.map_preview()
@@ -129,9 +126,8 @@ class GeneratorUI:
             st.warning(Messages.OVERLOADED, icon="⚠️")
 
         with self.buttons_container:
-            if not config.is_on_community_server():
-                if st.button("Generate", key="launch_btn", disabled=generate_button_disabled):
-                    self.generate_map()
+            if st.button("Generate", key="launch_btn", disabled=generate_button_disabled):
+                self.generate_map()
 
         # Download button.
         if st.session_state.generated:
@@ -148,20 +144,6 @@ class GeneratorUI:
             config.remove_with_delay_without_blocking(self.download_path)
 
             st.session_state.generated = False
-
-    def get_sesion_name(self, coordinates: tuple[float, float]) -> str:
-        """Return a session name for the map, using the coordinates and the current timestamp.
-
-        Arguments:
-            coordinates (tuple[float, float]): The latitude and longitude of the center point of
-                the map.
-
-        Returns:
-            str: The session name for the map.
-        """
-        coordinates_str = "_".join(map(self.shorten_coordinate, coordinates))
-        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        return f"{self.main_settings.game_code}_{coordinates_str}_{timestamp}"
 
     def shorten_coordinate(self, coordinate: float) -> str:
         """Shorten a coordinate to a string.
@@ -234,9 +216,8 @@ class GeneratorUI:
 
         # Session name will be used for a directory name as well as a zip file name.
 
-        session_name = self.get_sesion_name(coordinates)
-
-        map_directory = os.path.join(config.MAPS_DIRECTORY, session_name)
+        session_name = mfs.Map.suggest_directory_name(coordinates, game.code)
+        map_directory = os.path.join(mfscfg.MFS_DATA_DIR, session_name)
         os.makedirs(map_directory, exist_ok=True)
 
         texture_schema = None
@@ -335,8 +316,9 @@ class GeneratorUI:
             progress_bar.progress(completed, "🗃️ Packing the map...")
 
             # Pack the generated map into a zip archive.
-            archive_path = mp.pack(os.path.join(config.ARCHIVES_DIRECTORY, session_name))
-
+            archive_path = mp.pack(
+                os.path.join(mfscfg.MFS_DATA_DIR, session_name), remove_source=not self.public
+            )
             self.download_path = archive_path
 
             st.session_state.generated = True

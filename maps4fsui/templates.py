@@ -41,23 +41,6 @@ class Messages:
     PUBLIC_MAP_SIZE = "If you run the app locally, you can generate maps of any size."
 
     MOVED = "The app has moved to ➡️➡️➡️ [maps4fs.xyz](https://maps4fs.xyz)"
-    MAIN_PAGE_COMMUNITY_WARNING = (
-        "🚜 Hey, farmer!  \n"
-        "Do you know what **Docker** is? If yes, please consider running the application "
-        "locally.  \n"
-        "StreamLit community hosting has some limitations, such as:  \n"
-        "🔸 Maximum map size is 2048x2048 meters.  \n"
-        "🔸 Background terrain will not be generated.  \n"
-        "🔸 Water planes will not be generated.  \n"
-        "🔸 Map rotation is disabled.  \n"
-        "🔸 Texture dissolving is disabled (they will look worse).  \n  \n"
-        "If you run the application locally, you won't have any of these limitations "
-        "and will be able to generate maps of any size with any settings you want and nice looking textures.  \n"
-        "Learn more about the Docker version in the repo's "
-        "[README](https://github.com/iwatkot/maps4fs?tab=readme-ov-file#option-2-docker-version).  \n"
-        "Also, if you are familiar with Python, you can use the "
-        "[maps4fs](https://pypi.org/project/maps4fs/) package to generate maps locally."
-    )
     TOOL_LOCAL = "💡 This tool is available in the local version of the tool."
     SETTING_LOCAL = "💡 This setting is available in the local version of the tool."
     SETTING_DISABLED_ON_PUBLIC = (
@@ -121,12 +104,6 @@ class Messages:
         "The template should match the structure of the default template, otherwise it will "
         "not work. Prepare the template carefully, any mistake can lead to errors or completely "
         "broken map. No support will be provided for custom templates."
-    )
-    CACHE_INFO = (
-        "Cache contains the data from DTM Providers, map previews, satellite images, etc. "
-        "If you clean the cache, it will be removed but the generator will download the data "
-        "again so it may take longer to generate the map. Do not clean the cache unless you "
-        "have any issues with it."
     )
     OUTPUT_SIZE_INFO = (
         "This value represents the map size in in-game meters. In case you want to "

@@ -1,33 +1,18 @@
 import json
 import os
-import shutil
 import subprocess
 import threading
 from time import sleep
 from typing import Any, Literal
 
+import maps4fs.generator.config as mfscfg
 import requests
-import schedule
 
 WORKING_DIRECTORY = os.getcwd()
-ARCHIVES_DIRECTORY = os.path.join(WORKING_DIRECTORY, "archives")
 DATA_DIRECTORY = os.path.join(WORKING_DIRECTORY, "data")
-MAPS_DIRECTORY = os.path.join(WORKING_DIRECTORY, "maps")
-TEMP_DIRECTORY = os.path.join(WORKING_DIRECTORY, "temp")
-INPUT_DIRECTORY = os.path.join(TEMP_DIRECTORY, "input")
-TILES_DIRECTORY = os.path.join(TEMP_DIRECTORY, "tiles")
-
-VIDEO_TUTORIALS_PATH = os.path.join(WORKING_DIRECTORY, "maps4fsui", "videos.json")
-
-with open(VIDEO_TUTORIALS_PATH, "r", encoding="utf-8") as f:
-    video_tutorials_json = json.load(f)
-
-STREAMLIT_COMMUNITY_KEY = "HOSTNAME"
-STREAMLIT_COMMUNITY_VALUE = "streamlit"
-PUBLIC_HOSTNAME_KEY = "PUBLIC_HOSTNAME"
-PUBLIC_HOSTNAME_VALUE = "maps4fs"
-
 DOCS_DIRECTORY = os.path.join(WORKING_DIRECTORY, "docs")
+os.makedirs(DOCS_DIRECTORY, exist_ok=True)
+os.makedirs(DATA_DIRECTORY, exist_ok=True)
 MD_FILES = {
     "📁 Map structure": "map_structure.md",
     "⛰️ DEM": "dem.md",
@@ -36,13 +21,24 @@ MD_FILES = {
     "🚜 Fields": "fields.md",
 }
 FAQ_MD = os.path.join(DOCS_DIRECTORY, "FAQ.md")
+VIDEO_TUTORIALS_PATH = os.path.join(WORKING_DIRECTORY, "maps4fsui", "videos.json")
+
+INPUT_DIRECTORY = os.path.join(mfscfg.MFS_CACHE_DIR, "input")
+os.makedirs(INPUT_DIRECTORY, exist_ok=True)
+
+
+with open(VIDEO_TUTORIALS_PATH, "r", encoding="utf-8") as f:
+    video_tutorials_json = json.load(f)
+
+PUBLIC_HOSTNAME_KEY = "PUBLIC_HOSTNAME"
+PUBLIC_HOSTNAME_VALUE = "maps4fs"
+
 
 QUEUE_LIMIT = 3
 DEFAULT_LAT = 45.28571409289627
 DEFAULT_LON = 20.237433441210115
 
 QUEUE_FILE = os.path.join(WORKING_DIRECTORY, "queue.json")
-HISTORY_FILE = os.path.join(WORKING_DIRECTORY, "history.json")
 QUEUE_TIMEOUT = 120
 QUEUE_INTERVAL = 10
 
@@ -79,15 +75,6 @@ def get_mds() -> dict[str, str]:
     return {
         md_file: os.path.join(DOCS_DIRECTORY, filename) for md_file, filename in MD_FILES.items()
     }
-
-
-def is_on_community_server() -> bool:
-    """Check if the script is running on the Streamlit Community server.
-
-    Returns:
-        bool: True if the script is running on the Streamlit Community server, False otherwise.
-    """
-    return os.environ.get(STREAMLIT_COMMUNITY_KEY) == STREAMLIT_COMMUNITY_VALUE
 
 
 def is_public() -> bool:
@@ -175,48 +162,3 @@ def get_directory_size(directory: str) -> int:
             if os.path.isfile(filepath):
                 total_size += os.path.getsize(filepath)
     return total_size
-
-
-def get_temp_size() -> float:
-    """Get the size of the temp directory (in MB).
-
-    Returns:
-        str: The size of the temp directory.
-    """
-    temp_size_bytes = get_directory_size(TEMP_DIRECTORY)
-    return temp_size_bytes / (1024**2)
-
-
-def create_dirs() -> None:
-    """Create the directories if they do not exist."""
-    directories = [
-        ARCHIVES_DIRECTORY,
-        DATA_DIRECTORY,
-        MAPS_DIRECTORY,
-        INPUT_DIRECTORY,
-        TILES_DIRECTORY,
-    ]
-    for directory in directories:
-        os.makedirs(directory, exist_ok=True)
-
-
-def clean_temp() -> None:
-    """Clean the temp directory."""
-    shutil.rmtree(TEMP_DIRECTORY, ignore_errors=True)
-    create_dirs()
-
-
-def run_scheduler():
-    """Run the scheduler."""
-    while True:
-        schedule.run_pending()
-        sleep(1)
-
-
-if is_public():
-    schedule.every(6).hours.do(clean_temp)
-    scheduler_thread = threading.Thread(target=run_scheduler)
-    scheduler_thread.daemon = True
-    scheduler_thread.start()
-
-create_dirs()

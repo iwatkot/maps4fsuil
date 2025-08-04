@@ -16,7 +16,6 @@ owslib
 tqdm
 scipy
 streamlit-folium
-schedule
 python-dotenv
 requests-cache
 mapbox-earcut
