@@ -1,8 +1,5 @@
 import json
 import os
-import subprocess
-import threading
-from time import sleep
 from typing import Any, Literal
 
 import maps4fs.generator.config as mfscfg
@@ -86,28 +83,6 @@ def is_public() -> bool:
     return os.environ.get(PUBLIC_HOSTNAME_KEY) == PUBLIC_HOSTNAME_VALUE
 
 
-def remove_with_delay_without_blocking(
-    file_path: str,
-    delay: int = REMOVE_DELAY,
-) -> None:
-    """Remove a file with a delay without blocking the main thread.
-
-    Arguments:
-        file_path (str): The path to the file to remove.
-        logger (mfs.Logger): The logger instance.
-        delay (int): The delay in seconds before removing the file.
-    """
-
-    def remove_file() -> None:
-        sleep(delay)
-        try:
-            os.remove(file_path)
-        except FileNotFoundError:
-            pass
-
-    threading.Thread(target=remove_file).start()
-
-
 def get_versions() -> tuple[str, str] | None:
     """Get the latest version and the current version of the package.
 
@@ -121,44 +96,11 @@ def get_versions() -> tuple[str, str] | None:
 
         latest_version = response.json()["info"]["version"]
 
-        current_version = get_package_version("maps4fs")
+        current_version = mfscfg.get_package_version("maps4fs")
+        if current_version == "unknown":
+            # Skip version check if the current version is unknown (e.g., local development).
+            current_version = latest_version
 
         return latest_version, current_version
     except Exception:
         return None
-
-
-def get_package_version(package_name: str) -> str:
-    """Get the package version."""
-    try:
-        result = subprocess.run(
-            [os.sys.executable, "-m", "pip", "show", package_name],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            check=True,
-        )
-        for line in result.stdout.splitlines():
-            if line.startswith("Version:"):
-                return line.split(":", 1)[1].strip()
-        return ""
-    except Exception:
-        return ""
-
-
-def get_directory_size(directory: str) -> int:
-    """Calculate the total size of the specified directory.
-
-    Args:
-        directory (str): The path to the directory.
-
-    Returns:
-        int: The total size of the directory in bytes.
-    """
-    total_size = 0
-    for dirpath, dirnames, filenames in os.walk(directory):
-        for filename in filenames:
-            filepath = os.path.join(dirpath, filename)
-            if os.path.isfile(filepath):
-                total_size += os.path.getsize(filepath)
-    return total_size

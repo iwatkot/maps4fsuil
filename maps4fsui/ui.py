@@ -4,8 +4,9 @@ from datetime import datetime
 import requests
 import requests_cache
 import streamlit as st
-from config import DOCS_DIRECTORY, FAQ_MD, get_mds
+from config import DOCS_DIRECTORY, FAQ_MD, get_mds, is_public
 from generator.generator import GeneratorUI
+from generator.my_maps import MyMapsUI
 from templates import Messages, video_tutorials
 from tools.section import Schemas
 
@@ -17,6 +18,7 @@ class WebUI:
         st.set_page_config(page_title="maps4FS", page_icon="🚜", layout="wide")
         (
             generator_tab,
+            my_maps_tab,
             step_by_step_tab,
             video_tutorials_tab,
             schema_editor_tab,
@@ -26,6 +28,7 @@ class WebUI:
         ) = st.tabs(
             [
                 "🗺️ Map Generator",
+                "🗂️ My maps",
                 "🔢 Step by step",
                 "📹 Video Tutorials",
                 "📑 Schema Editor",
@@ -37,6 +40,14 @@ class WebUI:
 
         with generator_tab:
             self.generator = GeneratorUI()
+
+        with my_maps_tab:
+            if is_public():
+                st.warning(
+                    "This feature is available only in the local version of maps4fs.", icon="🚧"
+                )
+            else:
+                self.my_maps = MyMapsUI()
 
         with step_by_step_tab:
             step_by_step_tab_path = os.path.join(DOCS_DIRECTORY, "step_by_step.md")

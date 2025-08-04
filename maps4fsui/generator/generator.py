@@ -141,8 +141,6 @@ class GeneratorUI:
                         icon="📥",
                     )
 
-            config.remove_with_delay_without_blocking(self.download_path)
-
             st.session_state.generated = False
 
     def shorten_coordinate(self, coordinate: float) -> str:
