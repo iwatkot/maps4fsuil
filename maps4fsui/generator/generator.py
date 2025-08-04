@@ -317,7 +317,7 @@ class GeneratorUI:
 
             # Pack the generated map into a zip archive.
             archive_path = mp.pack(
-                os.path.join(mfscfg.MFS_DATA_DIR, session_name), remove_source=not self.public
+                os.path.join(mfscfg.MFS_DATA_DIR, session_name), remove_source=self.public
             )
             self.download_path = archive_path
 
