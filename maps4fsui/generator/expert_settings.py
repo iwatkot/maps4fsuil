@@ -126,14 +126,3 @@ class ExpertSettings(BaseComponent):
                     with open(self.custom_background_path, "wb") as f:
                         f.write(uploaded_file.read())
                     st.success(f"Custom background uploaded: {uploaded_file.name}")
-
-            if not self.public:
-                manage_cache = st.checkbox("Manage cache", value=False, key="manage_cache")
-                if manage_cache:
-                    temp_size = config.get_temp_size()
-                    st.write(Messages.CACHE_INFO)
-                    st.write(f"Cache size: {round(temp_size, 2)} MB")
-                    if temp_size > 10:
-                        if st.button("Clean cache"):
-                            config.clean_temp()
-                            st.success("Cache cleaned.")

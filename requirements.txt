@@ -16,9 +16,9 @@ owslib
 tqdm
 scipy
 streamlit-folium
-schedule
 python-dotenv
 requests-cache
 mapbox-earcut
 manifold3d
+countryflag
 git+https://github.com/iwatkot/maps4fsapi.git
