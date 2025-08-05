@@ -17,8 +17,8 @@ class WebUI:
     def __init__(self):
         st.set_page_config(page_title="maps4FS", page_icon="🚜", layout="wide")
         (
-            generator_tab,
             my_maps_tab,
+            generator_tab,
             step_by_step_tab,
             video_tutorials_tab,
             schema_editor_tab,
@@ -27,8 +27,8 @@ class WebUI:
             changelog_tab,
         ) = st.tabs(
             [
-                "🗺️ Map Generator",
                 "🗂️ My maps",
+                "🗺️ Map Generator",
                 "🔢 Step by step",
                 "📹 Video Tutorials",
                 "📑 Schema Editor",

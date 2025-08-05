@@ -2,9 +2,8 @@ import json
 import os
 import re
 import shutil
-from typing import Generator, NamedTuple
+from typing import Generator, Literal, NamedTuple
 
-import countryflag
 import maps4fs.generator.config as mfscfg
 import streamlit as st
 from maps4fs.generator.settings import GenerationSettings, MainSettings
@@ -24,14 +23,13 @@ class MapEntry(NamedTuple):
         with st.container(border=True):
             info_column, previews_column = st.columns([3, 1], gap="large")
             with info_column:
-                flag = countryflag.getflag(self.main_settings.country)
-
-                st.subheader(f"{flag} {self.main_settings.date} at {self.main_settings.time}")
+                st.subheader(f"{self.main_settings.date} at {self.main_settings.time}")
 
                 st.markdown(self._badges())
 
                 st.markdown(
                     f"**Coordinates:** `{self.main_settings.latitude}, {self.main_settings.longitude}`  \n"
+                    f"**Country:** {self.main_settings.country}  \n"
                     f"**Size:** {self.main_settings.size}  \n"
                     f"**Rotation:** {self.main_settings.rotation}  \n"
                     f"**DTM Provider:** {self.main_settings.dtm_provider}  \n"
@@ -39,7 +37,7 @@ class MapEntry(NamedTuple):
                 )
                 st.json(self.generation_settings.to_json(), expanded=False)
 
-                left, middle, right, *_ = st.columns([1, 1, 1, 4])
+                left, middle, right, *_ = st.columns([1, 1, 1, 3])
                 with left:
                     archive_path = self._archive()
                     with open(archive_path, "rb") as f:
@@ -62,14 +60,22 @@ class MapEntry(NamedTuple):
                         key=f"repeat_{self.directory}",
                     )
                 with right:
-                    st.button(
+                    if st.button(
                         label="Delete",
                         use_container_width=True,
                         icon="🗑️",
-                        disabled=True,
-                        help="Will be available soon",
                         key=f"delete_{self.directory}",
-                    )
+                    ):
+                        try:
+                            shutil.rmtree(self.directory)
+                            archive_path = self._archive(do_not_check=True)
+                            if os.path.isfile(archive_path):
+                                os.remove(archive_path)
+
+                            st.success("Map deleted successfully.")
+                        except Exception:
+                            pass
+                        st.warning("Map deletion failed.")
             with previews_column:
                 image_preview_paths = self._previews()
                 for row in range(0, len(image_preview_paths), 2):
@@ -84,6 +90,58 @@ class MapEntry(NamedTuple):
                             column.image(image, use_container_width=True)
                         except Exception:
                             continue
+
+    @property
+    def completed(self) -> bool:
+        """Check if the map entry is complete based on its main settings.
+
+        Returns:
+            bool: True if the map entry is complete, False otherwise.
+        """
+        return self.main_settings.completed
+
+    @property
+    def error(self) -> bool:
+        """Check if the map entry has an error based on its main settings.
+
+        Returns:
+            bool: True if the map entry has an error, False otherwise.
+        """
+        return self.main_settings.error
+
+    @property
+    def api_request(self) -> bool:
+        """Check if the map entry was generated using an API request.
+
+        Returns:
+            bool: True if the map entry was generated using an API request, False otherwise.
+        """
+        return self.main_settings.api_request
+
+    def matches_filter(
+        self, filters: list[Literal["Complete", "Incomplete", "Error", "API"]]
+    ) -> bool:
+        """Filter the map entry based on the provided filters.
+
+        Args:
+            filters (list): List of filters to apply.
+
+        Returns:
+            bool: True if the map entry matches any of the filters, False otherwise.
+        """
+        if not filters:
+            return True
+
+        filter_map = {
+            "Complete": self.completed,
+            "Incomplete": not self.completed,
+            "Error": self.error,
+            "API": self.api_request,
+        }
+        for filter_name in filters:
+            if filter_name in filter_map and filter_map[filter_name]:
+                return True
+        return False
 
     def _badges(self) -> str:
         """Generate badges based on the main settings of the map entry.
@@ -132,7 +190,7 @@ class MapEntry(NamedTuple):
                 previews.append(file_path)
         return previews
 
-    def _archive(self) -> str:
+    def _archive(self, do_not_check: bool = False) -> str:
         directory_name = os.path.basename(self.directory)
         full_archive_path = os.path.join(mfscfg.MFS_DATA_DIR, f"{directory_name}.zip")
         archive_path = full_archive_path.replace(".zip", "")
