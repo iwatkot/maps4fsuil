@@ -1,7 +1,9 @@
 import json
+import math
 import os
 import re
 import shutil
+import uuid
 from typing import Generator, Literal
 
 import maps4fs.generator.config as mfscfg
@@ -10,6 +12,7 @@ from maps4fs.generator.settings import GenerationSettings, MainSettings
 from PIL import Image
 
 DIR_PATTERN = r"^(\d+_\d+)_fs"
+PAGE_LIMIT = 10
 
 
 class MapEntry:
@@ -20,12 +23,17 @@ class MapEntry:
     generation_settings: GenerationSettings
 
     def __init__(
-        self, directory: str, main_settings: MainSettings, generation_settings: GenerationSettings
+        self,
+        directory: str,
+        main_settings: MainSettings,
+        generation_settings: GenerationSettings,
+        page: int,
     ):
         self.directory = directory
         self.main_settings = main_settings
         self.generation_settings = generation_settings
         self.name = self._find_name(directory)
+        self.page = page
 
     def get_ui(self):
         with st.container(border=True):
@@ -35,7 +43,7 @@ class MapEntry:
                     "name",
                     value=self.name,
                     label_visibility="collapsed",
-                    key=f"name_{self.directory}_input",
+                    key=f"name_{self.directory}_input_{self.page}",
                     on_change=self.test_rename_callback,
                 )
 
@@ -63,8 +71,9 @@ class MapEntry:
                                     "Prepare download",
                                     icon="📦",
                                     use_container_width=True,
-                                    key=f"prepare_{self.directory}",
+                                    key=f"prepare_{self.directory}_{self.page}",
                                 ):
+                                    print("!!!!!")
                                     with download_container:
                                         archive_path = self._archive()
                                         with open(archive_path, "rb") as f:
@@ -75,7 +84,7 @@ class MapEntry:
                                                 mime="application/zip",
                                                 icon="📥",
                                                 use_container_width=True,
-                                                key=f"download_{self.directory}",
+                                                key=f"download_{self.directory}_{self.page}",
                                             )
                         with middle:
                             st.button(
@@ -84,14 +93,14 @@ class MapEntry:
                                 icon="🔁",
                                 disabled=True,
                                 help="Will be available soon",
-                                key=f"repeat_{self.directory}",
+                                key=f"repeat_{self.directory}_{self.page}",
                             )
                         with right:
                             if st.button(
                                 label="Delete",
                                 use_container_width=True,
                                 icon="🗑️",
-                                key=f"delete_{self.directory}",
+                                key=f"delete_{self.directory}_{self.page}",
                             ):
                                 try:
                                     shutil.rmtree(self.directory)
@@ -278,7 +287,7 @@ class MapEntry:
         Args:
             new_name (str): The new name for the map entry.
         """
-        name_input = st.session_state.get(f"name_{self.directory}_input")
+        name_input = st.session_state.get(f"name_{self.directory}_input_{self.page}")
         if name_input and name_input != self.name:
             self.update_name(name_input)
 
@@ -315,39 +324,102 @@ class MyMapsUI:
             icon="⚠️",
         )
 
-        for directory_name in self.find_map_directories():
-            directory_path = os.path.join(mfscfg.MFS_DATA_DIR, directory_name)
+        total_directories = self.find_map_directories()
+        # total_pages = math.ceil(len(total_directories) / PAGE_LIMIT)
+        self.total_pages = 5  # ! DEBUG # TODO: Remove
+        if "current_page" not in st.session_state:
+            st.session_state.current_page = 1
 
-            map_entry = self.get_map_entry(directory_path)
-            if map_entry:
-                map_entry.get_ui()
+        self.main_content = st.empty()
+
+        self.page = st.session_state.current_page
+        self.build_page()
+
+        if self.total_pages > 1:
+            print(f"Current page: {st.session_state.current_page}")
+            with st.container():
+                _, left, middle, right, _ = st.columns([1, 1, 1, 1, 1])
+                with left:
+                    st.button(
+                        "Previous",
+                        disabled=st.session_state.current_page == 1,
+                        use_container_width=True,
+                        type="tertiary",
+                        on_click=self.previous_page,
+                    )
+                with middle:
+                    st.button(
+                        f"{st.session_state.current_page} / {self.total_pages}",
+                        use_container_width=True,
+                        type="tertiary",
+                    )
+                with right:
+                    st.button(
+                        "Next",
+                        disabled=st.session_state.current_page == self.total_pages,
+                        use_container_width=True,
+                        type="tertiary",
+                        on_click=self.next_page,
+                    )
+
+    def previous_page(self):
+        if st.session_state.current_page > 1:
+            st.session_state.current_page -= 1
+            self.build_page()
+
+    def next_page(self):
+        if st.session_state.current_page < self.total_pages:
+            st.session_state.current_page += 1
+            self.build_page()
+
+    def build_page(self):
+        map_directories = self.find_map_directories()
+        first_idx = (st.session_state.current_page - 1) * PAGE_LIMIT
+        last_idx = first_idx + PAGE_LIMIT
+        last_idx = min(last_idx, len(map_directories))
+
+        with self.main_content:
+            with st.container():
+                for directory_name in map_directories[first_idx:last_idx]:
+                    directory_path = os.path.join(mfscfg.MFS_DATA_DIR, directory_name)
+
+                    map_entry = self.get_map_entry(directory_path, self.page)
+                    if map_entry:
+                        map_entry.get_ui()
 
     @staticmethod
-    def find_map_directories(directory: str = mfscfg.MFS_DATA_DIR) -> Generator[str, None, None]:
+    def find_map_directories(
+        directory: str = mfscfg.MFS_DATA_DIR, use_pattern: bool = True
+    ) -> list[str]:
         """Find directories that match the map directory pattern and yield their names.
 
         Args:
             directory (str): The directory to search in. Defaults to mfscfg.MFS_DATA_DIR.
+            use_pattern (bool): Whether to use the directory pattern for matching. Defaults to True.
 
-        Yields:
-            str: The names of directories that match the map directory pattern.
+        Returns:
+            list[str]: A list of directory names that match the pattern.
         """
         matches = []
         for entry in os.listdir(directory):
             if os.path.isdir(os.path.join(directory, entry)):
-                match = re.match(DIR_PATTERN, entry)
-                if match:
+                if not use_pattern:
                     matches.append(entry)
+                else:
+                    match = re.match(DIR_PATTERN, entry)
+                    if match:
+                        matches.append(entry)
         matches = sorted(matches, reverse=True)
 
-        yield from matches
+        return matches
 
     @staticmethod
-    def get_map_entry(directory_path: str) -> MapEntry | None:
+    def get_map_entry(directory_path: str, page: int) -> MapEntry | None:
         """Get the map entry for a given directory path.
 
         Args:
             directory_path (str): The path of the directory.
+            page (int): The page number.
 
         Returns:
             MapEntry: A named tuple containing main settings and generation settings.
@@ -372,4 +444,4 @@ class MyMapsUI:
         except Exception:
             return None
 
-        return MapEntry(directory_path, main_settings, generation_settings)
+        return MapEntry(directory_path, main_settings, generation_settings, page)
