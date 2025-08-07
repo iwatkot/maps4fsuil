@@ -2,7 +2,7 @@ import json
 import os
 import re
 import shutil
-from typing import Generator, Literal, NamedTuple
+from typing import Generator, Literal
 
 import maps4fs.generator.config as mfscfg
 import streamlit as st
@@ -12,22 +12,37 @@ from PIL import Image
 DIR_PATTERN = r"^(\d+_\d+)_fs"
 
 
-class MapEntry(NamedTuple):
+class MapEntry:
     """Represents a map entry with its directory, main settings, and generation settings."""
 
     directory: str
     main_settings: MainSettings
     generation_settings: GenerationSettings
 
+    def __init__(
+        self, directory: str, main_settings: MainSettings, generation_settings: GenerationSettings
+    ):
+        self.directory = directory
+        self.main_settings = main_settings
+        self.generation_settings = generation_settings
+        self.name = self._find_name(directory)
+
     def get_ui(self):
         with st.container(border=True):
             info_column, previews_column = st.columns([3, 1], gap="large")
             with info_column:
-                st.subheader(f"{self.main_settings.date} at {self.main_settings.time}")
+                self.name_input = st.text_input(
+                    "name",
+                    value=self.name,
+                    label_visibility="collapsed",
+                    key=f"name_{self.directory}_input",
+                    on_change=self.test_rename_callback,
+                )
 
                 st.markdown(self._badges())
 
                 st.markdown(
+                    f"**Date and Time:** `{self.main_settings.date} at {self.main_settings.time}`  \n"
                     f"**Coordinates:** `{self.main_settings.latitude}, {self.main_settings.longitude}`  \n"
                     f"**Country:** {self.main_settings.country}  \n"
                     f"**Size:** {self.main_settings.size}  \n"
@@ -37,45 +52,58 @@ class MapEntry(NamedTuple):
                 )
                 st.json(self.generation_settings.to_json(), expanded=False)
 
-                left, middle, right, *_ = st.columns([1, 1, 1, 3])
-                with left:
-                    archive_path = self._archive()
-                    with open(archive_path, "rb") as f:
-                        st.download_button(
-                            label="Download",
-                            data=f,
-                            file_name=f"{archive_path.split('/')[-1]}",
-                            mime="application/zip",
-                            icon="📥",
-                            use_container_width=True,
-                            key=f"download_{self.directory}",
-                        )
-                with middle:
-                    st.button(
-                        "Repeat",
-                        use_container_width=True,
-                        icon="🔁",
-                        disabled=True,
-                        help="Will be available soon",
-                        key=f"repeat_{self.directory}",
-                    )
-                with right:
-                    if st.button(
-                        label="Delete",
-                        use_container_width=True,
-                        icon="🗑️",
-                        key=f"delete_{self.directory}",
-                    ):
-                        try:
-                            shutil.rmtree(self.directory)
-                            archive_path = self._archive(do_not_check=True)
-                            if os.path.isfile(archive_path):
-                                os.remove(archive_path)
+                buttons_container = st.empty()
+                with buttons_container:
+                    with st.container():
+                        left, middle, right, *_ = st.columns([1, 1, 1, 3])
+                        with left:
+                            archive_path = self._archive()
+                            with open(archive_path, "rb") as f:
+                                st.download_button(
+                                    label="Download",
+                                    data=f,
+                                    file_name=f"{archive_path.split('/')[-1]}",
+                                    mime="application/zip",
+                                    icon="📥",
+                                    use_container_width=True,
+                                    key=f"download_{self.directory}",
+                                )
+                        with middle:
+                            st.button(
+                                "Repeat",
+                                use_container_width=True,
+                                icon="🔁",
+                                disabled=True,
+                                help="Will be available soon",
+                                key=f"repeat_{self.directory}",
+                            )
+                        with right:
+                            if st.button(
+                                label="Delete",
+                                use_container_width=True,
+                                icon="🗑️",
+                                key=f"delete_{self.directory}",
+                            ):
+                                try:
+                                    shutil.rmtree(self.directory)
+                                    archive_path = self._archive(do_not_check=True)
+                                    if os.path.isfile(archive_path):
+                                        os.remove(archive_path)
+                                    res = True
+                                except Exception:
+                                    res = False
+                                with buttons_container:
+                                    if res:
+                                        st.success(
+                                            "Map entry deleted successfully.",
+                                            icon="✅",
+                                        )
+                                    else:
+                                        st.error(
+                                            "Failed to delete map entry.",
+                                            icon="❌",
+                                        )
 
-                            st.success("Map deleted successfully.")
-                        except Exception:
-                            pass
-                        st.warning("Map deletion failed.")
             with previews_column:
                 image_preview_paths = self._previews()
                 for row in range(0, len(image_preview_paths), 2):
@@ -199,6 +227,51 @@ class MapEntry(NamedTuple):
             shutil.make_archive(archive_path, "zip", self.directory)
 
         return full_archive_path
+
+    def _find_name(self, directory: str) -> str:
+        name_file_path = os.path.join(directory, "name.txt")
+        if not os.path.isfile(name_file_path):
+            name = self._default_name()
+            self.update_name(name)
+
+        with open(name_file_path, "r") as f:
+            name = f.read().strip()
+        if not name:
+            name = self._default_name()
+            self.update_name(name)
+        return name
+
+    def _default_name(self) -> str:
+        """Generate a default name for the map entry based on its main settings.
+
+        Returns:
+            str: A default name for the map entry.
+        """
+        return (
+            f"{self.main_settings.date} at {self.main_settings.time} - "
+            f"{self.main_settings.latitude}, {self.main_settings.longitude}"
+        )
+
+    def update_name(self, new_name: str | None = None) -> None:
+        """Update the name of the map entry and save it to a file.
+
+        Args:
+            new_name (str): The new name for the map entry.
+        """
+        self.name = new_name or self._default_name()
+        name_file_path = os.path.join(self.directory, "name.txt")
+        with open(name_file_path, "w") as f:
+            f.write(new_name)
+
+    def test_rename_callback(self) -> None:
+        """Callback function to handle renaming of the map entry.
+
+        Args:
+            new_name (str): The new name for the map entry.
+        """
+        name_input = st.session_state.get(f"name_{self.directory}_input")
+        if name_input and name_input != self.name:
+            self.update_name(name_input)
 
 
 class MyMapsUI:
