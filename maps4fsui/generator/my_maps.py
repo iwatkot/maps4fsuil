@@ -29,7 +29,7 @@ class MapEntry:
 
     def get_ui(self):
         with st.container(border=True):
-            info_column, previews_column = st.columns([3, 1], gap="large")
+            info_column, previews_column = st.columns([2, 1], gap="large")
             with info_column:
                 self.name_input = st.text_input(
                     "name",
@@ -55,19 +55,28 @@ class MapEntry:
                 buttons_container = st.empty()
                 with buttons_container:
                     with st.container():
-                        left, middle, right, *_ = st.columns([1, 1, 1, 3])
+                        left, middle, right, *_ = st.columns([1, 1, 1])
                         with left:
-                            archive_path = self._archive()
-                            with open(archive_path, "rb") as f:
-                                st.download_button(
-                                    label="Download",
-                                    data=f,
-                                    file_name=f"{archive_path.split('/')[-1]}",
-                                    mime="application/zip",
-                                    icon="📥",
+                            download_container = st.empty()
+                            with download_container:
+                                if st.button(
+                                    "Prepare download",
+                                    icon="📦",
                                     use_container_width=True,
-                                    key=f"download_{self.directory}",
-                                )
+                                    key=f"prepare_{self.directory}",
+                                ):
+                                    with download_container:
+                                        archive_path = self._archive()
+                                        with open(archive_path, "rb") as f:
+                                            st.download_button(
+                                                label="Download",
+                                                data=f,
+                                                file_name=f"{archive_path.split('/')[-1]}",
+                                                mime="application/zip",
+                                                icon="📥",
+                                                use_container_width=True,
+                                                key=f"download_{self.directory}",
+                                            )
                         with middle:
                             st.button(
                                 "Repeat",

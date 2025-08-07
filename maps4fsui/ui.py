@@ -27,7 +27,7 @@ class WebUI:
             changelog_tab,
         ) = st.tabs(
             [
-                "🗂️ My maps",
+                "🗂️ My maps 🅱️",
                 "🗺️ Map Generator",
                 "🔢 Step by step",
                 "📹 Video Tutorials",
