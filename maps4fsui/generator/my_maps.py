@@ -14,6 +14,13 @@ DIR_PATTERN = r"^(\d+_\d+)_fs"
 PAGE_SIZE = 2
 
 
+class Parameters:
+    COMPLETE = "Complete"
+    INCOMPLETE = "Incomplete"
+    ERROR = "Error"
+    API = "API"
+
+
 class MapEntry:
     """Represents a map entry with its directory, main settings, and generation settings."""
 
@@ -43,7 +50,7 @@ class MapEntry:
                     value=self.name,
                     label_visibility="collapsed",
                     key=f"name_{self.directory}_input_{self.page}",
-                    on_change=self.test_rename_callback,
+                    on_change=self.rename_map_entry,
                 )
 
                 st.markdown(self._badges())
@@ -177,10 +184,10 @@ class MapEntry:
             return True
 
         filter_map = {
-            "Complete": self.completed,
-            "Incomplete": not self.completed,
-            "Error": self.error,
-            "API": self.api_request,
+            Parameters.COMPLETE: self.completed,
+            Parameters.INCOMPLETE: not self.completed,
+            Parameters.ERROR: self.error,
+            Parameters.API: self.api_request,
         }
         for filter_name in filters:
             if filter_name in filter_map and filter_map[filter_name]:
@@ -279,7 +286,7 @@ class MapEntry:
         with open(name_file_path, "w") as f:
             f.write(new_name)
 
-    def test_rename_callback(self) -> None:
+    def rename_map_entry(self) -> None:
         """Callback function to handle renaming of the map entry.
 
         Args:
@@ -295,18 +302,16 @@ class MyMapsUI:
 
     def __init__(self):
         filters = [
-            "Complete",
-            "Incomplete",
-            "Error",
-            "API",
+            Parameters.COMPLETE,
+            Parameters.INCOMPLETE,
+            Parameters.ERROR,
+            Parameters.API,
         ]
         self.filter = st.pills(
             "Filter maps",
             options=filters,
             selection_mode="multi",
-            default=["Complete"],
-            disabled=True,
-            help="Will be available soon",
+            default=[Parameters.COMPLETE],
         )
 
         self.search_input = st.text_input(
@@ -327,6 +332,9 @@ class MyMapsUI:
         if "current_page" not in st.session_state:
             st.session_state.current_page = 1
 
+        if "total_pages" not in st.session_state:
+            st.session_state.total_pages = self.total_pages
+
         self.main_content = st.empty()
 
         self.page = st.session_state.current_page
@@ -345,14 +353,14 @@ class MyMapsUI:
                     )
                 with middle:
                     st.button(
-                        f"{st.session_state.current_page} / {self.total_pages}",
+                        f"{st.session_state.current_page} / {st.session_state.total_pages}",
                         use_container_width=True,
                         type="tertiary",
                     )
                 with right:
                     st.button(
                         "Next",
-                        disabled=st.session_state.current_page == self.total_pages,
+                        disabled=st.session_state.current_page == st.session_state.total_pages,
                         use_container_width=True,
                         type="tertiary",
                         on_click=self.next_page,
@@ -368,20 +376,35 @@ class MyMapsUI:
             st.session_state.current_page += 1
             self.build_page()
 
+    def update_total_pages(self, filtered_elements_count: int):
+        st.session_state.total_pages = math.ceil(filtered_elements_count / PAGE_SIZE)
+
     def build_page(self):
         map_directories = self.find_map_directories()
+
+        all_map_entries = []
+        for directory_name in map_directories:
+            directory_path = os.path.join(mfscfg.MFS_DATA_DIR, directory_name)
+
+            map_entry = self.get_map_entry(directory_path, self.page)
+            if map_entry:
+                all_map_entries.append(map_entry)
+
+        filtered_map_entries = []
+        for map_entry in all_map_entries:
+            if map_entry.matches_filter(self.filter):
+                filtered_map_entries.append(map_entry)
+
+        self.update_total_pages(len(filtered_map_entries))
+
         first_idx = (st.session_state.current_page - 1) * PAGE_SIZE
         last_idx = first_idx + PAGE_SIZE
-        last_idx = min(last_idx, len(map_directories))
+        last_idx = min(last_idx, len(filtered_map_entries))
 
         with self.main_content:
             with st.container():
-                for directory_name in map_directories[first_idx:last_idx]:
-                    directory_path = os.path.join(mfscfg.MFS_DATA_DIR, directory_name)
-
-                    map_entry = self.get_map_entry(directory_path, self.page)
-                    if map_entry:
-                        map_entry.get_ui()
+                for map_entry in filtered_map_entries[first_idx:last_idx]:
+                    map_entry.get_ui()
 
     @staticmethod
     def find_map_directories(
