@@ -11,7 +11,7 @@ from maps4fs.generator.settings import GenerationSettings, MainSettings
 from PIL import Image
 
 DIR_PATTERN = r"^(\d+_\d+)_fs"
-PAGE_SIZE = 2
+PAGE_SIZE = 5
 
 
 class Parameters:
@@ -194,6 +194,20 @@ class MapEntry:
                 return True
         return False
 
+    def matches_search(self, search_input: str) -> bool:
+        """Check if the map entry matches the search input.
+
+        Args:
+            search_input (str): The search input to match against.
+
+        Returns:
+            bool: True if the map entry matches the search input, False otherwise.
+        """
+        if not search_input:
+            return True
+
+        return search_input.lower() in self.name.lower()
+
     def _badges(self) -> str:
         """Generate badges based on the main settings of the map entry.
 
@@ -312,14 +326,14 @@ class MyMapsUI:
             options=filters,
             selection_mode="multi",
             default=[Parameters.COMPLETE],
+            label_visibility="collapsed",
         )
 
         self.search_input = st.text_input(
             "Search",
-            placeholder="Search by coordinates",
+            placeholder="Search by name",
             label_visibility="collapsed",
-            disabled=True,
-            help="Will be available soon",
+            key="search_my_maps_input",
         )
 
         st.warning(
@@ -392,7 +406,9 @@ class MyMapsUI:
 
         filtered_map_entries = []
         for map_entry in all_map_entries:
-            if map_entry.matches_filter(self.filter):
+            if map_entry.matches_filter(self.filter) and map_entry.matches_search(
+                self.search_input
+            ):
                 filtered_map_entries.append(map_entry)
 
         self.update_total_pages(len(filtered_map_entries))
