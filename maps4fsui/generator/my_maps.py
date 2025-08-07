@@ -36,6 +36,7 @@ class MapEntry:
         page: int,
     ):
         self.directory = directory
+        self.directory_name = os.path.basename(directory)
         self.main_settings = main_settings
         self.generation_settings = generation_settings
         self.name = self._find_name(directory)
@@ -194,15 +195,19 @@ class MapEntry:
                 return True
         return False
 
-    def matches_search(self, search_input: str) -> bool:
+    def matches_search(self, search_input: str, public: bool = False) -> bool:
         """Check if the map entry matches the search input.
 
         Args:
             search_input (str): The search input to match against.
+            public (bool): Whether the app is running in public mode.
 
         Returns:
             bool: True if the map entry matches the search input, False otherwise.
         """
+        if public:
+            return search_input.lower() == self.directory_name.lower()
+
         if not search_input:
             return True
 
@@ -314,20 +319,26 @@ class MapEntry:
 class MyMapsUI:
     """UI for displaying list of previously generated maps."""
 
-    def __init__(self):
+    def __init__(self, public: bool):
+        self.public = public
+
         filters = [
             Parameters.COMPLETE,
             Parameters.INCOMPLETE,
             Parameters.ERROR,
             Parameters.API,
         ]
-        self.filter = st.pills(
-            "Filter maps",
-            options=filters,
-            selection_mode="multi",
-            default=[Parameters.COMPLETE],
-            label_visibility="collapsed",
-        )
+
+        if self.public:
+            self.filter = filters
+        else:
+            self.filter = st.pills(
+                "Filter maps",
+                options=filters,
+                selection_mode="multi",
+                default=[Parameters.COMPLETE],
+                label_visibility="collapsed",
+            )
 
         self.search_input = st.text_input(
             "Search",
@@ -340,6 +351,11 @@ class MyMapsUI:
             "Warning: beta feature, expect errors and bugs.",
             icon="⚠️",
         )
+
+        if self.public:
+            if not self.search_input:
+                st.error("On public version of the app you must provide your unique map name.")
+                return
 
         total_directories = self.find_map_directories()
         self.total_pages = math.ceil(len(total_directories) / PAGE_SIZE)
@@ -407,11 +423,14 @@ class MyMapsUI:
         filtered_map_entries = []
         for map_entry in all_map_entries:
             if map_entry.matches_filter(self.filter) and map_entry.matches_search(
-                self.search_input
+                self.search_input, public=self.public
             ):
                 filtered_map_entries.append(map_entry)
 
         self.update_total_pages(len(filtered_map_entries))
+
+        if not filtered_map_entries:
+            st.warning("No maps found matching the current filters.")
 
         first_idx = (st.session_state.current_page - 1) * PAGE_SIZE
         last_idx = first_idx + PAGE_SIZE

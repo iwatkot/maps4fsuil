@@ -11,6 +11,14 @@ echo "Uvicorn version: $(uvicorn --version)"
 echo "Streamlit version: $(streamlit --version)"
 echo "PYTHONPATH: $PYTHONPATH"
 echo "--------------------------------------"
+echo "Removing the queue.json file if it exists..."
+if [ -f "queue.json" ]; then
+    rm "queue.json"
+    echo "Removed queue.json file."
+else
+    echo "queue.json file does not exist."
+fi
+echo "--------------------------------------"
 echo "Starting FastAPI (Uvicorn) on port 8000..."
 echo "Starting Streamlit UI on port 8501..."
 echo "======================================"

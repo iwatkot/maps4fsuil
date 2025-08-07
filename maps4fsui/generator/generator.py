@@ -114,6 +114,7 @@ class GeneratorUI:
         )
 
         # Add an empty container for status messages.
+        self.key_container = st.empty()
         self.status_container = st.empty()
 
         # Add an empty container for buttons.
@@ -286,6 +287,13 @@ class GeneratorUI:
             return
 
         if self.public:
+            with self.key_container:
+                st.info(
+                    f"Session name: **{session_name}**  \n"
+                    "You can use it to find your map on the 🗂️ My Maps page.",
+                    icon="ℹ️",
+                )
+
             add_to_queue(session_name)
             for position in wait_in_queue(session_name):
                 self.status_container.info(
@@ -315,7 +323,7 @@ class GeneratorUI:
 
             # Pack the generated map into a zip archive.
             archive_path = mp.pack(
-                os.path.join(mfscfg.MFS_DATA_DIR, session_name), remove_source=self.public
+                os.path.join(mfscfg.MFS_DATA_DIR, session_name), remove_source=False
             )
             self.download_path = archive_path
 

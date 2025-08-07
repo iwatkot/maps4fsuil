@@ -42,12 +42,12 @@ class WebUI:
             self.generator = GeneratorUI()
 
         with my_maps_tab:
-            if is_public():
-                st.warning(
-                    "This feature is available only in the local version of maps4fs.", icon="🚧"
-                )
-            else:
-                self.my_maps = MyMapsUI()
+            # if is_public():
+            #     st.warning(
+            #         "This feature is available only in the local version of maps4fs.", icon="🚧"
+            #     )
+            # else:
+            self.my_maps = MyMapsUI(is_public())
 
         with step_by_step_tab:
             step_by_step_tab_path = os.path.join(DOCS_DIRECTORY, "step_by_step.md")
