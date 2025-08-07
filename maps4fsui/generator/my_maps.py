@@ -3,8 +3,7 @@ import math
 import os
 import re
 import shutil
-import uuid
-from typing import Generator, Literal
+from typing import Literal
 
 import maps4fs.generator.config as mfscfg
 import streamlit as st
@@ -12,7 +11,7 @@ from maps4fs.generator.settings import GenerationSettings, MainSettings
 from PIL import Image
 
 DIR_PATTERN = r"^(\d+_\d+)_fs"
-PAGE_LIMIT = 10
+PAGE_SIZE = 2
 
 
 class MapEntry:
@@ -73,7 +72,6 @@ class MapEntry:
                                     use_container_width=True,
                                     key=f"prepare_{self.directory}_{self.page}",
                                 ):
-                                    print("!!!!!")
                                     with download_container:
                                         archive_path = self._archive()
                                         with open(archive_path, "rb") as f:
@@ -325,8 +323,7 @@ class MyMapsUI:
         )
 
         total_directories = self.find_map_directories()
-        # total_pages = math.ceil(len(total_directories) / PAGE_LIMIT)
-        self.total_pages = 5  # ! DEBUG # TODO: Remove
+        self.total_pages = math.ceil(len(total_directories) / PAGE_SIZE)
         if "current_page" not in st.session_state:
             st.session_state.current_page = 1
 
@@ -336,7 +333,6 @@ class MyMapsUI:
         self.build_page()
 
         if self.total_pages > 1:
-            print(f"Current page: {st.session_state.current_page}")
             with st.container():
                 _, left, middle, right, _ = st.columns([1, 1, 1, 1, 1])
                 with left:
@@ -374,8 +370,8 @@ class MyMapsUI:
 
     def build_page(self):
         map_directories = self.find_map_directories()
-        first_idx = (st.session_state.current_page - 1) * PAGE_LIMIT
-        last_idx = first_idx + PAGE_LIMIT
+        first_idx = (st.session_state.current_page - 1) * PAGE_SIZE
+        last_idx = first_idx + PAGE_SIZE
         last_idx = min(last_idx, len(map_directories))
 
         with self.main_content:
