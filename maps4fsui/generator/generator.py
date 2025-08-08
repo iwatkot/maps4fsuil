@@ -40,7 +40,7 @@ class GeneratorUI:
 
     def __init__(self):
         self.download_path = None
-        self.previous_settings = config.get_one_time_settings()
+        self.template_settings = config.get_one_time_settings()
 
         self.public = config.is_public()
 
@@ -103,12 +103,14 @@ class GeneratorUI:
 
         self.main_settings = MainSettings(
             self.public,
-            settings_template=self.previous_settings.get("main_settings", {}),
+            settings_template=self.template_settings.get("main_settings", {}),
             html_preview_container=self.html_preview_container,
         )
 
         self.advanced_settings = AdvancedSettings(
-            self.public, dtm_provider_code=self.main_settings.dtm_provider_code
+            self.public,
+            settings_template=self.template_settings.get("generation_settings", {}),
+            dtm_provider_code=self.main_settings.dtm_provider_code,
         )
         self.expert_settings = ExpertSettings(
             self.public,

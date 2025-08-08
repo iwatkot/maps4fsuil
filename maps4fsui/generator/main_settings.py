@@ -1,11 +1,11 @@
 from time import sleep
-from typing import Any, Literal, NamedTuple
 
 import config
 import maps4fs as mfs
 import osmp
 import streamlit as st
 from generator.base_component import BaseComponent
+from generator.settings_templates import MainSettingsTemplate
 from streamlit_folium import folium_static
 from templates import Messages
 
@@ -13,19 +13,11 @@ GAME_OPTIONS = ["FS25", "FS22"]
 DEFAULT_MAP_SIZES = [2048, 4096, 8192, 16384]
 
 
-class MainSettingsTemplate(NamedTuple):
-    game: Literal["FS25", "FS22"] = "FS25"
-    latitude: float = config.DEFAULT_LAT
-    longitude: float = config.DEFAULT_LON
-    size: int = 2048
-    rotation: int = 0
-    dtm_provider: str = "SRTM 30 m"
-
-
 class MainSettings(BaseComponent):
-    def __init__(self, public: bool, settings_template: dict[str, Any] | None, **kwargs):
+    def __init__(self, public: bool, **kwargs):
         super().__init__(public, **kwargs)
         self.html_preview_container = kwargs["html_preview_container"]
+        settings_template = kwargs.get("settings_template", {})
         try:
             self.template = MainSettingsTemplate(**settings_template)
         except TypeError:
