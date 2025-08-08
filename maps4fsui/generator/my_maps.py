@@ -415,11 +415,6 @@ class MyMapsUI:
             key="search_my_maps_input",
         )
 
-        st.warning(
-            "Warning: beta feature, expect errors and bugs.",
-            icon="⚠️",
-        )
-
         if self.public:
             if not self.search_input:
                 st.error("On public version of the app you must provide your unique map name.")
