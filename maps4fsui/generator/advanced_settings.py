@@ -25,7 +25,6 @@ class AdvancedSettings(BaseComponent):
 
             category = {}
             with st.expander(category_name, expanded=False):
-                print(category_name)
                 for idx, (raw_field_name, field_value) in enumerate(model.__dict__.items()):
                     default_value = default_category_settings.get(raw_field_name)
                     if default_value is not None:

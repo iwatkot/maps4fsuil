@@ -1,16 +1,27 @@
 from time import sleep
+from typing import Literal, NamedTuple
 
 import config
 import maps4fs as mfs
 import osmp
 import streamlit as st
 from generator.base_component import BaseComponent
-from generator.settings_templates import MainSettingsTemplate
+
+# from generator.settings_templates import MainSettingsTemplate
 from streamlit_folium import folium_static
 from templates import Messages
 
 GAME_OPTIONS = ["FS25", "FS22"]
 DEFAULT_MAP_SIZES = [2048, 4096, 8192, 16384]
+
+
+class MainSettingsTemplate(NamedTuple):
+    game: Literal["FS25", "FS22"] = "FS25"
+    latitude: float = config.DEFAULT_LAT
+    longitude: float = config.DEFAULT_LON
+    size: int = 2048
+    rotation: int = 0
+    dtm_provider: str = "SRTM 30 m"
 
 
 class MainSettings(BaseComponent):

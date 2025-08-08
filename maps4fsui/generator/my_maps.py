@@ -5,6 +5,7 @@ import re
 import shutil
 from typing import Literal
 
+import config
 import maps4fs.generator.config as mfscfg
 import streamlit as st
 from maps4fs.generator.settings import GenerationSettings, MainSettings
@@ -95,14 +96,13 @@ class MapEntry:
                                                 key=f"download_{self.directory}_{self.page}",
                                             )
                         with middle:
-                            st.button(
+                            if st.button(
                                 "Repeat",
                                 use_container_width=True,
                                 icon="🔁",
-                                disabled=True,
-                                help="Will be available soon",
                                 key=f"repeat_{self.directory}_{self.page}",
-                            )
+                            ):
+                                self.to_file()
                         with right:
                             if st.button(
                                 label="Delete",
@@ -343,6 +343,28 @@ class MapEntry:
         name_input = st.session_state.get(f"name_{self.directory}_input_{self.page}")
         if name_input and name_input != self.name:
             self.update_name(name_input)
+
+    def to_json(self) -> dict[str, dict[str, str | int | float]]:
+        main_settings = {
+            "game": self.main_settings.game,
+            "latitude": self.main_settings.latitude,
+            "longitude": self.main_settings.longitude,
+            "size": self.main_settings.size,
+            "rotation": self.main_settings.rotation,
+            "dtm_provider": self.main_settings.dtm_provider,
+        }
+        generation_settings = self.generation_settings.to_json()
+
+        return {
+            "main_settings": main_settings,
+            "generation_settings": generation_settings,
+        }
+
+    def to_file(self, save_path: str | None = None) -> str:
+        save_path = save_path or config.ONE_TIME_SETTINGS_PATH
+        with open(save_path, "w") as f:
+            json.dump(self.to_json(), f, indent=4)
+        return save_path
 
 
 class MyMapsUI:
