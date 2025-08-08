@@ -56,6 +56,8 @@ class MapEntry:
 
                 st.markdown(self._badges())
 
+                st.markdown(self._asset_badges())
+
                 st.markdown(
                     f"**Date and Time:** `{self.main_settings.date} at {self.main_settings.time}`  \n"
                     f"**Coordinates:** `{self.main_settings.latitude}, {self.main_settings.longitude}`  \n"
@@ -234,6 +236,33 @@ class MapEntry:
             badges.append(":green-badge[Complete]")
         if self.main_settings.error:
             badges.append(":red-badge[Error]")
+        return " ".join(badges)
+
+    def _asset_badges(self) -> str:
+        badges = []
+
+        # Most important assets.
+        if self.generation_settings.background_settings.generate_background:
+            badges.append(":green-badge[Background]")
+        if self.generation_settings.background_settings.generate_water:
+            badges.append(":blue-badge[Water]")
+        if self.generation_settings.texture_settings.dissolve:
+            badges.append(":grey-badge[Dissolved]")
+        if self.generation_settings.satellite_settings.download_images:
+            badges.append(":orange-badge[Satellite Images]")
+
+        # Less important assets.
+        if self.generation_settings.dem_settings.add_foundations:
+            badges.append(":grey-badge[Foundations]")
+        if self.generation_settings.background_settings.flatten_roads:
+            badges.append(":grey-badge[Flatten Roads]")
+        if self.generation_settings.grle_settings.add_grass:
+            badges.append(":green-badge[Grass]")
+        if self.generation_settings.grle_settings.random_plants:
+            badges.append(":green-badge[Random Plants]")
+        if self.generation_settings.i3d_settings.add_trees:
+            badges.append(":green-badge[Trees]")
+
         return " ".join(badges)
 
     def _previews(self) -> list[str]:
