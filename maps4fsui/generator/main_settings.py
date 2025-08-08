@@ -126,8 +126,9 @@ class MainSettings(BaseComponent):
         provider_codes = list(providers.keys())
 
         try:
-            provider_idx = provider_codes.index(self.template_provider_code)
+            provider_idx = provider_codes.index(self.template_provider_code())
         except ValueError:
+            print("Provider not found")
             provider_idx = 0
 
         st.write("Select the DTM provider:")
