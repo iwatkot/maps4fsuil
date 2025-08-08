@@ -54,7 +54,12 @@ def get_one_time_settings() -> dict[str, Any]:
 
     try:
         with open(ONE_TIME_SETTINGS_PATH, "r", encoding="utf-8") as f:
-            return json.load(f)
+            data = json.load(f)
+        try:
+            os.remove(ONE_TIME_SETTINGS_PATH)
+        except Exception:
+            pass
+        return data
     except Exception:
         return {}
 
