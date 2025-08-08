@@ -7,6 +7,7 @@ from typing import Literal
 
 import maps4fs.generator.config as mfscfg
 import streamlit as st
+import streamlit_antd_components as stc
 from maps4fs.generator.settings import GenerationSettings, MainSettings
 from PIL import Image
 
@@ -55,6 +56,14 @@ class MapEntry:
                 )
 
                 st.markdown(self._badges())
+
+                stc.tree(
+                    self.dir_to_sac_tree_items(self.directory),
+                    label="Directory Tree",
+                    open_all=True,
+                    icon="table",
+                    key=f"tree_{self.directory}_{self.page}",
+                )
 
                 st.markdown(
                     f"**Date and Time:** `{self.main_settings.date} at {self.main_settings.time}`  \n"
@@ -314,6 +323,25 @@ class MapEntry:
         name_input = st.session_state.get(f"name_{self.directory}_input_{self.page}")
         if name_input and name_input != self.name:
             self.update_name(name_input)
+
+    def dir_to_sac_tree_items(self, path):
+        def build_tree(path):
+            items = []
+            try:
+                for name in sorted(os.listdir(path)):
+                    full_path = os.path.join(path, name)
+                    if os.path.isdir(full_path):
+                        # Recursively add children for directories
+                        children = build_tree(full_path)
+                        items.append(stc.TreeItem(name, icon="folder", children=children))
+                    else:
+                        items.append(stc.TreeItem(name, icon="file"))
+            except Exception:
+                # Optionally handle permission errors, etc.
+                pass
+            return items
+
+        return build_tree(path)
 
 
 class MyMapsUI:
