@@ -40,6 +40,7 @@ class GeneratorUI:
 
     def __init__(self):
         self.download_path = None
+        self.previous_settings = config.get_one_time_settings()
 
         self.public = config.is_public()
 
@@ -101,7 +102,9 @@ class GeneratorUI:
         st.markdown("---")
 
         self.main_settings = MainSettings(
-            self.public, html_preview_container=self.html_preview_container
+            self.public,
+            settings_template=self.previous_settings.get("main_settings", {}),
+            html_preview_container=self.html_preview_container,
         )
 
         self.advanced_settings = AdvancedSettings(

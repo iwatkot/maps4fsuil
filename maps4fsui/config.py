@@ -19,6 +19,7 @@ MD_FILES = {
 }
 FAQ_MD = os.path.join(DOCS_DIRECTORY, "FAQ.md")
 VIDEO_TUTORIALS_PATH = os.path.join(WORKING_DIRECTORY, "maps4fsui", "videos.json")
+ONE_TIME_SETTINGS_PATH = os.path.join(WORKING_DIRECTORY, "maps4fsui", "one_time_settings.json")
 
 INPUT_DIRECTORY = os.path.join(mfscfg.MFS_CACHE_DIR, "input")
 os.makedirs(INPUT_DIRECTORY, exist_ok=True)
@@ -40,6 +41,22 @@ QUEUE_TIMEOUT = 120
 QUEUE_INTERVAL = 10
 
 REMOVE_DELAY = 300  # 5 minutes
+
+
+def get_one_time_settings() -> dict[str, Any]:
+    """Get the one-time settings from the configuration file if it exists.
+
+    Returns:
+        dict[str, Any]: The one-time settings if they exist, an empty dictionary otherwise.
+    """
+    if not os.path.isfile(ONE_TIME_SETTINGS_PATH):
+        return {}
+
+    try:
+        with open(ONE_TIME_SETTINGS_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
 
 
 def get_schema(game_code: str, schema_type: Literal["texture", "tree"]) -> list[dict[str, Any]]:
