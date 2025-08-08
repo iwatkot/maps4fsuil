@@ -360,9 +360,14 @@ class MapEntry:
         }
         generation_settings = self.generation_settings.to_json()
 
+        additional_settings = {
+            "custom_osm": self.custom_osm,
+        }
+
         return {
             "main_settings": main_settings,
             "generation_settings": generation_settings,
+            "additional_settings": additional_settings,
         }
 
     def to_file(self, save_path: str | None = None) -> str:
@@ -370,6 +375,13 @@ class MapEntry:
         with open(save_path, "w") as f:
             json.dump(self.to_json(), f, indent=4)
         return save_path
+
+    @property
+    def custom_osm(self) -> str | None:
+        custom_osm_path = os.path.join(self.directory, "custom_osm.osm")
+        if self.main_settings.custom_osm and os.path.isfile(custom_osm_path):
+            return custom_osm_path
+        return None
 
 
 class MyMapsUI:
