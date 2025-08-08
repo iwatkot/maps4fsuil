@@ -42,6 +42,7 @@ class MapEntry:
         self.generation_settings = generation_settings
         self.name = self._find_name(directory)
         self.page = page
+        self.settings_applied = False
 
     def get_ui(self):
         with st.container(border=True):
@@ -103,6 +104,8 @@ class MapEntry:
                                 key=f"repeat_{self.directory}_{self.page}",
                             ):
                                 self.to_file()
+                                self.settings_applied = True
+
                         with right:
                             if st.button(
                                 label="Delete",
@@ -129,6 +132,8 @@ class MapEntry:
                                             "Failed to delete map entry.",
                                             icon="❌",
                                         )
+            if self.settings_applied:
+                st.success("Settings applied, please reload the page.", icon="✅")
 
             with previews_column:
                 image_preview_paths = self._previews()
