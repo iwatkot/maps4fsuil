@@ -374,6 +374,19 @@ class GeneratorUI:
         Arguments:
             mp (Map): The generated map.
         """
+        captions_map = {
+            "background_dem.png": "Background DEM",
+            "satellite_background.png": "Background Satellite",
+            "dem_colored.png": "Map DEM (Colored)",
+            "dem_grayscale.png": "Map DEM",
+            "environment.png": "Environment",
+            "farmlands_with_fields.png": "Farmlands with Fields",
+            "farmlands.png": "Farmlands",
+            "indoor.png": "Indoor Mask",
+            "textures_osm.png": "OSM Textures",
+            "satellite_overview.png": "Satellite Overview",
+        }
+
         # Get a list of all preview images.
         full_preview_paths = mp.previews()
         if not full_preview_paths:
@@ -398,8 +411,13 @@ class GeneratorUI:
                     if not os.path.isfile(image_preview_path):
                         continue
                     try:
+                        filename = os.path.basename(image_preview_path)
                         image = Image.open(image_preview_path)
-                        column.image(image, use_container_width=True)
+                        column.image(
+                            image,
+                            use_container_width=True,
+                            caption=captions_map.get(filename, None),
+                        )
                     except Exception:
                         continue
 
