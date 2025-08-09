@@ -103,6 +103,7 @@ class MapEntry:
                                 use_container_width=True,
                                 icon="🔁",
                                 key=f"repeat_{self.directory}_{self.page}",
+                                disabled=config.is_public(),
                             ):
                                 self.to_file()
                                 self.settings_applied = True

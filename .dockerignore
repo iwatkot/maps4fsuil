@@ -22,3 +22,6 @@ queue.json
 history.json
 map_directory/
 local.env
+mfsrootdir/
+data/
+docs/
