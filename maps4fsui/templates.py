@@ -14,9 +14,8 @@ class Messages:
         "🤗 If you like the project, consider supporting it on [Buy Me a Coffee](https://www.buymeacoffee.com/iwatkot) or "
         "[Patreon](https://www.patreon.com/iwatkot).  \n"
         "🐙 Visit the [GitHub repository](https://github.com/iwatkot/maps4fs) for more information.  \n"
-        "📹 A complete step-by-step video tutorial is on [YouTube](https://www.youtube.com/watch?v=Nl_aqXJ5nAk&)!  \n"
-        "📹 WIP: Check out the complete playlist of video turorials on [YouTube]"
-        "(https://www.youtube.com/watch?v=hPbJZ0HoiDE&list=PLug0g7UYHX8D1Jik6NkJjQhdxqS-NOtB9). 🆕"
+        "📹 Check out the complete playlist of video tutorials on [YouTube]"
+        "(https://www.youtube.com/watch?v=hPbJZ0HoiDE&list=PLug0g7UYHX8D1Jik6NkJjQhdxqS-NOtB9)."
     )
 
     LOCAL_VERSION = (
