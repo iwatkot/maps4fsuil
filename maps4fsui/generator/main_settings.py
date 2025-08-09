@@ -6,8 +6,6 @@ import maps4fs as mfs
 import osmp
 import streamlit as st
 from generator.base_component import BaseComponent
-
-# from generator.settings_templates import MainSettingsTemplate
 from streamlit_folium import folium_static
 from templates import Messages
 
@@ -20,6 +18,7 @@ class MainSettingsTemplate(NamedTuple):
     latitude: float = config.DEFAULT_LAT
     longitude: float = config.DEFAULT_LON
     size: int = 2048
+    output_size: int = 2048
     rotation: int = 0
     dtm_provider: str = "SRTM 30 m"
 
@@ -108,7 +107,7 @@ class MainSettings(BaseComponent):
             self.output_size = st.number_input(
                 label="Output Size (in-game meters)",
                 min_value=2,
-                value=2048,
+                value=self.template.output_size,
                 key="output_size",
                 label_visibility="collapsed",
             )

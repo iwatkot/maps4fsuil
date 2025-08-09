@@ -65,6 +65,7 @@ class MapEntry:
                     f"**Coordinates:** `{self.main_settings.latitude}, {self.main_settings.longitude}`  \n"
                     f"**Country:** {self.main_settings.country}  \n"
                     f"**Size:** {self.main_settings.size}  \n"
+                    f"**Output Size:** {self.main_settings.output_size}  \n"
                     f"**Rotation:** {self.main_settings.rotation}  \n"
                     f"**DTM Provider:** {self.main_settings.dtm_provider}  \n"
                     "**Generation Settings:**"
@@ -355,6 +356,7 @@ class MapEntry:
             "latitude": self.main_settings.latitude,
             "longitude": self.main_settings.longitude,
             "size": self.main_settings.size,
+            "output_size": self.main_settings.output_size,
             "rotation": self.main_settings.rotation,
             "dtm_provider": self.main_settings.dtm_provider,
         }
