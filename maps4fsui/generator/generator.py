@@ -40,6 +40,7 @@ class GeneratorUI:
 
     def __init__(self):
         self.download_path = None
+        self.template_settings = config.get_one_time_settings()
 
         self.public = config.is_public()
 
@@ -47,6 +48,14 @@ class GeneratorUI:
 
         if "generated" not in st.session_state:
             st.session_state.generated = False
+
+        if "custom_osm_path_restored" not in st.session_state:
+            additional_settings = self.template_settings.get("additional_settings", {})
+            custom_osm_path = additional_settings.get("custom_osm", None)
+            if custom_osm_path:
+                st.session_state.custom_osm_path_restored = custom_osm_path
+            else:
+                st.session_state.custom_osm_path_restored = None
 
         with self.right_column:
             self.add_right_widgets()
@@ -101,11 +110,15 @@ class GeneratorUI:
         st.markdown("---")
 
         self.main_settings = MainSettings(
-            self.public, html_preview_container=self.html_preview_container
+            self.public,
+            settings_template=self.template_settings.get("main_settings", {}),
+            html_preview_container=self.html_preview_container,
         )
 
         self.advanced_settings = AdvancedSettings(
-            self.public, dtm_provider_code=self.main_settings.dtm_provider_code
+            self.public,
+            settings_template=self.template_settings.get("generation_settings", {}),
+            dtm_provider_code=self.main_settings.dtm_provider_code,
         )
         self.expert_settings = ExpertSettings(
             self.public,
@@ -238,7 +251,11 @@ class GeneratorUI:
         if self.expert_settings.custom_osm_enabled:
             osm_path = self.expert_settings.custom_osm_path
         else:
-            osm_path = None
+            if st.session_state.custom_osm_path_restored:
+                osm_path = st.session_state.custom_osm_path_restored
+                st.session_state.custom_osm_path_restored = None
+            else:
+                osm_path = None
 
         dtm_provider = mfs.DTMProvider.get_provider_by_code(self.main_settings.dtm_provider_code)
 

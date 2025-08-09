@@ -1,4 +1,5 @@
 from time import sleep
+from typing import Literal, NamedTuple
 
 import config
 import maps4fs as mfs
@@ -8,21 +9,43 @@ from generator.base_component import BaseComponent
 from streamlit_folium import folium_static
 from templates import Messages
 
+GAME_OPTIONS = ["FS25", "FS22"]
+DEFAULT_MAP_SIZES = [2048, 4096, 8192, 16384]
+
+
+class MainSettingsTemplate(NamedTuple):
+    game: Literal["FS25", "FS22"] = "FS25"
+    latitude: float = config.DEFAULT_LAT
+    longitude: float = config.DEFAULT_LON
+    size: int = 2048
+    output_size: int = 2048
+    rotation: int = 0
+    dtm_provider: str = "SRTM 30 m"
+
 
 class MainSettings(BaseComponent):
     def __init__(self, public: bool, **kwargs):
         super().__init__(public, **kwargs)
         self.html_preview_container = kwargs["html_preview_container"]
+        settings_template = kwargs.get("settings_template", {})
+        try:
+            self.template = MainSettingsTemplate(**settings_template)
+        except TypeError:
+            self.template = MainSettingsTemplate()
 
         st.write("Select the game for which you want to generate the map:")
+
+        try:
+            game_idx = GAME_OPTIONS.index(self.template.game)
+        except ValueError:
+            game_idx = 0
+
         self.game_code = st.selectbox(
             "Game",
-            options=[
-                "FS25",
-                "FS22",
-            ],
+            options=GAME_OPTIONS,
             key="game_code",
             label_visibility="collapsed",
+            index=game_idx,
         )
 
         if self.game_code == "FS22":
@@ -31,15 +54,23 @@ class MainSettings(BaseComponent):
         st.write("Enter latitude and longitude of the center point of the map:")
         self.lat_lon_input = st.text_input(
             "Latitude and Longitude",
-            f"{config.DEFAULT_LAT}, {config.DEFAULT_LON}",
+            f"{self.template.latitude}, {self.template.longitude}",
             key="lat_lon",
             label_visibility="collapsed",
             on_change=self.map_preview,
         )
 
-        size_options = [2048, 4096, 8192, 16384, "Custom"]
+        size_options = DEFAULT_MAP_SIZES + ["Custom"]
         if self.public:
             size_options = size_options[:2]
+
+        size = self.template.size
+        try:
+            if size not in DEFAULT_MAP_SIZES:
+                size = "Custom"
+            size_idx = size_options.index(size)
+        except ValueError:
+            size_idx = 0
 
         st.write("Select size of the map:")
         self.map_size_input = st.selectbox(
@@ -47,6 +78,7 @@ class MainSettings(BaseComponent):
             options=size_options,
             label_visibility="collapsed",
             on_change=self.map_preview,
+            index=size_idx,
         )
 
         self.output_size = None
@@ -56,10 +88,15 @@ class MainSettings(BaseComponent):
 
         if self.map_size_input == "Custom":
             st.write("Enter map size (real world meters):")
+
+            default_custom_value = 2048
+            if size == "Custom":
+                default_custom_value = self.template.size
+
             custom_map_size_input = st.number_input(
                 label="Size (meters)",
                 min_value=2,
-                value=2048,
+                value=default_custom_value,
                 key="custom_size",
                 label_visibility="collapsed",
                 on_change=self.map_preview,
@@ -70,7 +107,7 @@ class MainSettings(BaseComponent):
             self.output_size = st.number_input(
                 label="Output Size (in-game meters)",
                 min_value=2,
-                value=2048,
+                value=self.template.output_size,
                 key="output_size",
                 label_visibility="collapsed",
             )
@@ -81,7 +118,20 @@ class MainSettings(BaseComponent):
         except ValueError:
             lat, lon = config.DEFAULT_LAT, config.DEFAULT_LON
 
+        dtm_provider = mfs.DTMProvider.get_provider_by_name(self.template.dtm_provider)
+        if dtm_provider:
+            self.template_provider_code = dtm_provider.code
+        else:
+            self.template_provider_code = None
+
         providers: dict[str, str] = mfs.DTMProvider.get_valid_provider_descriptions((lat, lon))
+        provider_codes = list(providers.keys())
+
+        try:
+            provider_idx = provider_codes.index(self.template_provider_code())
+        except ValueError:
+            print("Provider not found")
+            provider_idx = 0
 
         st.write("Select the DTM provider:")
         self.dtm_provider_code = st.selectbox(
@@ -92,6 +142,7 @@ class MainSettings(BaseComponent):
             label_visibility="collapsed",
             # disabled=self.public,
             on_change=self.provider_info,
+            index=provider_idx,
         )
         self.provider_settings = None
         self.provider_info_container: st.delta_generator.DeltaGenerator = st.empty()
@@ -103,7 +154,7 @@ class MainSettings(BaseComponent):
             "Rotation",
             min_value=-180,
             max_value=180,
-            value=0,
+            value=self.template.rotation,
             step=1,
             key="rotation",
             label_visibility="collapsed",

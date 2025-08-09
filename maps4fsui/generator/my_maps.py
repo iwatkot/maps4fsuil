@@ -5,6 +5,7 @@ import re
 import shutil
 from typing import Literal
 
+import config
 import maps4fs.generator.config as mfscfg
 import streamlit as st
 from maps4fs.generator.settings import GenerationSettings, MainSettings
@@ -41,6 +42,7 @@ class MapEntry:
         self.generation_settings = generation_settings
         self.name = self._find_name(directory)
         self.page = page
+        self.settings_applied = False
 
     def get_ui(self):
         with st.container(border=True):
@@ -63,6 +65,7 @@ class MapEntry:
                     f"**Coordinates:** `{self.main_settings.latitude}, {self.main_settings.longitude}`  \n"
                     f"**Country:** {self.main_settings.country}  \n"
                     f"**Size:** {self.main_settings.size}  \n"
+                    f"**Output Size:** {self.main_settings.output_size}  \n"
                     f"**Rotation:** {self.main_settings.rotation}  \n"
                     f"**DTM Provider:** {self.main_settings.dtm_provider}  \n"
                     "**Generation Settings:**"
@@ -95,14 +98,15 @@ class MapEntry:
                                                 key=f"download_{self.directory}_{self.page}",
                                             )
                         with middle:
-                            st.button(
+                            if st.button(
                                 "Repeat",
                                 use_container_width=True,
                                 icon="🔁",
-                                disabled=True,
-                                help="Will be available soon",
                                 key=f"repeat_{self.directory}_{self.page}",
-                            )
+                            ):
+                                self.to_file()
+                                self.settings_applied = True
+
                         with right:
                             if st.button(
                                 label="Delete",
@@ -129,6 +133,8 @@ class MapEntry:
                                             "Failed to delete map entry.",
                                             icon="❌",
                                         )
+            if self.settings_applied:
+                st.success("Settings applied, please reload the page.", icon="✅")
 
             with previews_column:
                 image_preview_paths = self._previews()
@@ -344,6 +350,41 @@ class MapEntry:
         if name_input and name_input != self.name:
             self.update_name(name_input)
 
+    def to_json(self) -> dict[str, dict[str, str | int | float]]:
+        main_settings = {
+            "game": self.main_settings.game,
+            "latitude": self.main_settings.latitude,
+            "longitude": self.main_settings.longitude,
+            "size": self.main_settings.size,
+            "output_size": self.main_settings.output_size,
+            "rotation": self.main_settings.rotation,
+            "dtm_provider": self.main_settings.dtm_provider,
+        }
+        generation_settings = self.generation_settings.to_json()
+
+        additional_settings = {
+            "custom_osm": self.custom_osm,
+        }
+
+        return {
+            "main_settings": main_settings,
+            "generation_settings": generation_settings,
+            "additional_settings": additional_settings,
+        }
+
+    def to_file(self, save_path: str | None = None) -> str:
+        save_path = save_path or config.ONE_TIME_SETTINGS_PATH
+        with open(save_path, "w") as f:
+            json.dump(self.to_json(), f, indent=4)
+        return save_path
+
+    @property
+    def custom_osm(self) -> str | None:
+        custom_osm_path = os.path.join(self.directory, "custom_osm.osm")
+        if self.main_settings.custom_osm and os.path.isfile(custom_osm_path):
+            return custom_osm_path
+        return None
+
 
 class MyMapsUI:
     """UI for displaying list of previously generated maps."""
@@ -374,11 +415,6 @@ class MyMapsUI:
             placeholder="Search by name",
             label_visibility="collapsed",
             key="search_my_maps_input",
-        )
-
-        st.warning(
-            "Warning: beta feature, expect errors and bugs.",
-            icon="⚠️",
         )
 
         if self.public:

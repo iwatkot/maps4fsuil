@@ -7,6 +7,8 @@ from templates import Settings
 class AdvancedSettings(BaseComponent):
     def __init__(self, public: bool, **kwargs):
         super().__init__(public, **kwargs)
+        self.template = kwargs.get("settings_template", {})
+
         dtm_provider_code = kwargs.get("dtm_provider_code", "srtm30")
         self.provider_default_settings = {}
         if dtm_provider_code == "srtm30":
@@ -29,6 +31,12 @@ class AdvancedSettings(BaseComponent):
                         field_value = default_value
                     field_name = self.snake_to_human(raw_field_name)
                     disabled = self.is_disabled_on_public(raw_field_name)
+
+                    json_category = category_name.replace(" ", "")
+                    value_from_template = self.template.get(json_category, {}).get(raw_field_name)
+
+                    if value_from_template is not None:
+                        field_value = value_from_template
 
                     with st.empty():
                         widget = self._create_widget(
