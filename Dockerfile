@@ -58,6 +58,7 @@ RUN apt-get update && apt-get install -y \
     libjemalloc2 \
     libjemalloc-dev \
     git \
+    zip \
     && rm -rf /var/lib/apt/lists/*
 
 # Install blender 4.3.0.
@@ -71,9 +72,15 @@ WORKDIR /usr/src/app
 
 # Clone external repo and copy data/docs
 RUN git clone --depth 1 https://github.com/iwatkot/maps4fs.git /tmp/maps4fs \
-    && cp -r /tmp/maps4fs/data /usr/src/app/data \
     && cp -r /tmp/maps4fs/docs /usr/src/app/docs \
     && rm -rf /tmp/maps4fs
+
+RUN git clone --depth 1 https://github.com/iwatkot/maps4fsdata.git /tmp/maps4fsdata \
+    && cd /tmp/maps4fsdata \
+    && chmod +x prepare_data.sh \
+    && ./prepare_data.sh \
+    && cp -r data /usr/src/app/data \
+    && rm -rf /tmp/maps4fsdata
 
 COPY .streamlit /usr/src/app/.streamlit
 COPY maps4fsui /usr/src/app/maps4fsui
