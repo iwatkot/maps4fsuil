@@ -183,7 +183,7 @@ class GeneratorUI:
         limited_settings = settings_json.copy()
         limited_settings["BackgroundSettings"]["flatten_roads"] = False
         limited_settings["TextureSettings"]["dissolve"] = False
-        limited_settings["SatelliteSettings"]["zoom_factor"] = 16
+        limited_settings["SatelliteSettings"]["zoom_level"] = 16
         return limited_settings
 
     def get_json_settings(self) -> dict[str, mfs.settings.SettingsModel]:
