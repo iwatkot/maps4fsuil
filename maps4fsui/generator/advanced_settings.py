@@ -68,5 +68,5 @@ class AdvancedSettings(BaseComponent):
         if not self.public:
             return False
 
-        disabled_fields = ["dissolve", "flatten_roads"]
+        disabled_fields = ["dissolve", "flatten_roads", "zoom_factor"]
         return raw_field_name in disabled_fields
